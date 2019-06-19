@@ -335,7 +335,6 @@ exports.room = {
     try {
       const myChatRoomId = await Room.getRoomMyChatId(userId);
 
-      console.log(myChatRoomId[0]._id, roomId);
       if (roomId == myChatRoomId[0]._id) {
         return res.status(403).json({
           error: __('room.my_chat.cant_leave'),

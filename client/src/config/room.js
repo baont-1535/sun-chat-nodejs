@@ -16,3 +16,6 @@ export const MESSAGE_PAGINATE = 10;
 export const VISIABLE_MSG_TO_LOAD = 4;
 export const LIMIT_QUANLITY_NEWEST_MSG = 200;
 export const NUMBER_REQUEST_JOIN_ROOM_OVERFLOW = 99;
+export const MIN_WIDTH = 21; // unit %
+export const MIN_WIDTH_OTHER_CONTAINERS = 27; // unit %
+export const MIN_WIDTH_DESC_CONTAINER = 11; // unit %

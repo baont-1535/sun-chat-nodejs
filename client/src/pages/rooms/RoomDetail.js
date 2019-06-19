@@ -150,10 +150,11 @@ class RoomDetail extends React.Component {
               roomInfo={roomInfo}
               loadedRoomInfo={loadedRoomInfo}
             />
-            <Sider className="sidebar-chat">
+            <Sider className="description-room">
               <Row type="flex" justify="start" className="title-desc-chat-room">
                 <Col span={24}>
                   <Text strong> {t('title.room_des')} </Text>
+                  <div className="content-desc-chat-room">{roomInfo.desc}</div>
                   {(roomInfo.type === ROOM_TYPE.DIRECT_CHAT ||
                     roomInfo.type === ROOM_TYPE.MY_CHAT ||
                     (roomInfo.type == ROOM_TYPE.GROUP_CHAT && isAdmin)) && (
@@ -181,7 +182,6 @@ class RoomDetail extends React.Component {
                   </Modal>
                 </Col>
               </Row>
-              <div className="content-desc-chat-room">{roomInfo.desc}</div>
             </Sider>
           </Layout>
         </Layout>

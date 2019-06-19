@@ -1,6 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router';
-import { Layout, Input, Button, List, Avatar, Icon, Row, Col, Badge, Popover, message, Divider, Spin } from 'antd';
+import { Layout, Input, Button, List, Avatar, Icon, Row, Col, Badge, Popover, message, Spin } from 'antd';
 import {
   loadMessages,
   sendMessage,
@@ -27,6 +27,7 @@ import InfiniteScroll from 'react-infinite-scroller';
 import '../../scss/messages.scss';
 import handlersMessage from '../../helpers/handlersMessage';
 import { getUserAvatarUrl } from './../../helpers/common';
+import changeSizeLayout from '../../helpers/changeSizeLayout';
 
 const { Content } = Layout;
 const initialState = {
@@ -109,6 +110,8 @@ class ChatBox extends React.Component {
         this.handleCancelEdit();
       }
     });
+
+    new changeSizeLayout('chat-room', 'side-bar');
   }
 
   componentDidUpdate(prevProps) {
@@ -838,7 +841,7 @@ class ChatBox extends React.Component {
           rows={4}
           style={{ resize: 'none' }}
           id="msg-content"
-          disabled={isReadOnly}
+          disabled={this.props.isReadOnly}
           onKeyDown={this.handleSendMessage}
         />
       </Content>

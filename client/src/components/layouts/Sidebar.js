@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Icon, Menu, Avatar, message, Typography, Dropdown, List, Button, Spin } from 'antd';
+import { Layout, Icon, Menu, Avatar, message, Typography, Dropdown, List, Button } from 'antd';
 import InfiniteScroll from 'react-infinite-scroller';
 import { checkExpiredToken } from './../../helpers/common';
 import { getListRoomsByUser, getQuantityRoomsByUserId, togglePinnedRoom } from './../../api/room';
@@ -11,6 +11,7 @@ import { SocketContext } from './../../context/SocketContext';
 import { withUserContext } from './../../context/withUserContext';
 import { withRouter } from 'react-router';
 import { getRoomAvatarUrl, getUserAvatarUrl } from './../../helpers/common';
+import changeSizeLayout from '../../helpers/changeSizeLayout';
 const { Sider } = Layout;
 
 class Sidebar extends React.Component {
@@ -115,6 +116,8 @@ class Sidebar extends React.Component {
           this.props.history.push(`/rooms/${this.props.userContext.my_chat_id}`);
         }
       });
+
+      new changeSizeLayout('side-bar', 'chat-room', 'description-room', true);
 
       socket.on('update_direct_room_info', res => {
         this.setState(prevState => ({
@@ -244,10 +247,12 @@ class Sidebar extends React.Component {
                 &nbsp;&nbsp;
                 <span className="nav-text">{room.name}</span>
               </div>
-              {room.quantity_unread > 0 && <Typography.Text mark>{room.quantity_unread}</Typography.Text>}
-              <Button className={room.pinned ? 'pin pinned' : 'pin'} onClick={this.handlePinned} value={room._id}>
-                <Icon type="pushpin" />
-              </Button>
+              <div className="state-room">
+                {room.quantity_unread > 0 && <Typography.Text mark>{room.quantity_unread}</Typography.Text>}
+                <Button className={room.pinned ? 'pin pinned' : 'pin'} onClick={this.handlePinned} value={room._id}>
+                  <Icon type="pushpin" />
+                </Button>
+              </div>
             </Link>
           </List.Item>
         );
@@ -255,7 +260,7 @@ class Sidebar extends React.Component {
 
     return (
       checkExpiredToken() && (
-        <Sider>
+        <Sider className="side-bar">
           <div id="div-filter">
             <Dropdown overlay={cond_filter}>
               <a className="ant-dropdown-link">

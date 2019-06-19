@@ -33,6 +33,9 @@ const config = {
   LIMIT_ITEM_SHOW: {
     ROOM: 20,
   },
+  MIN_WIDTH: 6.5, // unit %
+  MAX_WIDTH: 27,  // unit %
+  WIDTH_DEFAULT_ROOM: 38, // unit %
 };
 
 export default config;
