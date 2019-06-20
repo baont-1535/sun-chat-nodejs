@@ -523,7 +523,7 @@ exports.loadMessages = async function(req, res) {
     }
 
     // Hot fix to load msg. In the future, you must handle by another way
-    if (Object.entries(messages).length === 0 && messages.constructor === Object) {
+    if (JSON.stringify([{}]) === JSON.stringify(messages)) {
       messages = [];
     }
 
