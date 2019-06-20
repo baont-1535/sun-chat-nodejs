@@ -91,6 +91,10 @@ class ChatBox extends React.Component {
     });
   }
 
+  componentWillReceiveProps() {
+    firstPrevMsgId = 0;
+  }
+
   componentDidMount() {
     const roomId = this.props.roomId;
     firstPrevMsgId = 0;
