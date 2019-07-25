@@ -563,12 +563,10 @@ exports.deleteMessage = async (req, res) => {
   const { messageId, roomId } = req.params;
 
   try {
-    let result = await Room.deleteMessage(messageId, roomId);
-    io.to(roomId).emit('response-after-action-delete-message', result ? messageId : null);
+    await Room.deleteMessage(messageId, roomId);
+    io.to(roomId).emit('delete-message', messageId);
   } catch (err) {
-    let { _id: userId } = req.decoded;
     channel.error(err);
-    io.to(userId).emit('response-after-action-delete-message', null);
   }
 };
 

@@ -67,7 +67,7 @@ const initialAttribute = {
 
   savedLastMsgId: null,
   scrollTop: 0,
-  infoUserTips: {}
+  infoUserTips: {},
 };
 
 class ChatBox extends React.Component {
@@ -135,7 +135,7 @@ class ChatBox extends React.Component {
       this.getDirectRoom(userId);
     });
 
-    this.socket.on('response-after-action-delete-message', msgId => {
+    this.socket.on('delete-message', msgId => {
       if (msgId) {
         let listMsg = this.state.messages.filter(msg => {
           return msg._id !== msgId;
@@ -144,6 +144,8 @@ class ChatBox extends React.Component {
         this.setState({
           messages: listMsg,
         });
+
+        message.success(t('delete.success'));
       }
     });
 
@@ -174,44 +176,47 @@ class ChatBox extends React.Component {
         } catch {
           flag = false;
           userInfo = {
-            name: t('cancelled_user')
-          }
+            name: t('cancelled_user'),
+          };
         }
       }
 
-      _this.setState({ infoUserTip: userInfo })
+      _this.setState({ infoUserTip: userInfo });
       if (flag) {
-        await _this.handleVisibleChange(profileTipId)(true)
+        await _this.handleVisibleChange(profileTipId)(true);
       }
     });
 
     $(document).on('click', 'body', function(event) {
-      let xPosition = 0, yPosition = 0;
-      xPosition = event.clientX - ($('.profileTooltip').width() / 2);
+      let xPosition = 0,
+        yPosition = 0;
+      xPosition = event.clientX - $('.profileTooltip').width() / 2;
 
-      if ((event.clientY - $('.profileTooltip').height()) < 0) {
+      if (event.clientY - $('.profileTooltip').height() < 0) {
         yPosition = event.clientY + 20;
         $('.tooltipTriangle').css({
-          'bottom': '225px',
+          bottom: '225px',
           'border-width': '0 7px 7px 7px',
-          'border-color': 'transparent transparent #a5a0a0 transparent'
-        })
+          'border-color': 'transparent transparent #a5a0a0 transparent',
+        });
       } else {
         yPosition = event.clientY - ($('.profileTooltip').height() + 25);
         $('.tooltipTriangle').css({
-          'bottom': '-7px',
+          bottom: '-7px',
           'border-width': '7px 7px 0 7px',
-          'border-color': '#a5a0a0 transparent transparent transparent'
-        })
+          'border-color': '#a5a0a0 transparent transparent transparent',
+        });
       }
 
       if (event.target.id == 'target') {
-        $('.profileTooltip').css({
-          top: yPosition + "px",
-          left: xPosition + "px"
-        }).show();
+        $('.profileTooltip')
+          .css({
+            top: yPosition + 'px',
+            left: xPosition + 'px',
+          })
+          .show();
       } else {
-        _this.setState({ infoUserTip:  {} });
+        _this.setState({ infoUserTip: {} });
         $('.profileTooltip').hide();
       }
     });
@@ -239,12 +244,14 @@ class ChatBox extends React.Component {
       }
 
       this.fetchData(this.props.roomId);
-      getListNicknameByUserInRoom(this.props.roomId).then(res => {
-        const nicknames = res.data.nicknames;
-        this.setState({ nicknames })
-      }).catch(err => {
+      getListNicknameByUserInRoom(this.props.roomId)
+        .then(res => {
+          const nicknames = res.data.nicknames;
+          this.setState({ nicknames });
+        })
+        .catch(err => {
           message.error(err.response.data.error);
-      });
+        });
     }
 
     if (Object.keys(this.attr.messageRowRefs).length && this.attr.firstLoading) {
@@ -436,9 +443,9 @@ class ChatBox extends React.Component {
     this.socket.emit('update_last_message_id', param);
   }
 
-  handleEmoji = (e) => {
+  handleEmoji = e => {
     handlersMessage.actionFunc.addEmoji(e.target.alt);
-  }
+  };
   // for display msg content - BEGIN
   formatMsgTime(timeInput) {
     const { t } = this.props;
@@ -495,9 +502,9 @@ class ChatBox extends React.Component {
         <div className="infor-bg">
           <Avatar src={getUserAvatarUrl(infoUserTip.avatar)} className="infor-avatar" />
         </div>
-        <div style={{ minHeight: '55px'}}>
-          <p className="infor-name">{ (infoUserTip.name) ? infoUserTip.name : t('loading')}</p>
-          <p>{ (infoUserTip.email) ? infoUserTip.email : '' }</p>
+        <div style={{ minHeight: '55px' }}>
+          <p className="infor-name">{infoUserTip.name ? infoUserTip.name : t('loading')}</p>
+          <p>{infoUserTip.email ? infoUserTip.email : ''}</p>
         </div>
         <div className="infor-footer">
           <div>{<List.Item style={{ minHeight: '35px' }}>{button}</List.Item>}</div>
@@ -651,17 +658,15 @@ class ChatBox extends React.Component {
       let params = {
         roomId: this.props.roomId,
         messageId: e.currentTarget.id,
-      }
+      };
 
       deleteMessage(params);
     }
   };
 
-  handleVisibleReaction = visible => {
+  handleVisibleReaction = visible => {};
 
-  }
-
-  generateReactionMsg = (msgId) => {
+  generateReactionMsg = msgId => {
     const listReaction = configEmoji.REACTION;
     const { t } = this.props;
     const content = (
@@ -672,18 +677,23 @@ class ChatBox extends React.Component {
               <li className="reactionSelectorTooltip__itemContainer" key={key}>
                 <span className="reactionSelectorTooltip__item">
                   <span className="reactionSelectorTooltip__emoticonContainer">
-                    <Avatar className="reactionSelectorTooltip__emoticon image-emoji" src={getEmoji(reaction.image)} alt={key} title={t(reaction.tooltip)} />
+                    <Avatar
+                      className="reactionSelectorTooltip__emoticon image-emoji"
+                      src={getEmoji(reaction.image)}
+                      alt={key}
+                      title={t(reaction.tooltip)}
+                    />
                   </span>
                 </span>
               </li>
-            )
+            );
           })}
         </ul>
       </div>
     );
 
     return content;
-  }
+  };
   // for reaction msg - END
 
   // generate list TO - BEGIN
@@ -730,18 +740,26 @@ class ChatBox extends React.Component {
     const listEmoji = configEmoji.EMOJI;
     const { t } = this.props;
     const content = (
-          <div className="member-infinite-container" style={{ width: '210px' }}>
-            <InfiniteScroll initialLoad={false} pageStart={0} loadMore={this.handleInfiniteOnLoad} useWindow={false}>
-              <div className="box-emoji" >
-                {Object.entries(listEmoji).map(([key, emoji]) => {
-                  return (
-                    <p className="line-emoji" key={key}><Avatar className="image-emoji" src={getEmoji(emoji.image)} alt={key} title={t(emoji.tooltip)} onClick={this.handleEmoji}/></p>
-                  )
-                })}
-              </div>
-            </InfiniteScroll>
+      <div className="member-infinite-container" style={{ width: '210px' }}>
+        <InfiniteScroll initialLoad={false} pageStart={0} loadMore={this.handleInfiniteOnLoad} useWindow={false}>
+          <div className="box-emoji">
+            {Object.entries(listEmoji).map(([key, emoji]) => {
+              return (
+                <p className="line-emoji" key={key}>
+                  <Avatar
+                    className="image-emoji"
+                    src={getEmoji(emoji.image)}
+                    alt={key}
+                    title={t(emoji.tooltip)}
+                    onClick={this.handleEmoji}
+                  />
+                </p>
+              );
+            })}
           </div>
-        );
+        </InfiniteScroll>
+      </div>
+    );
 
     return content;
   };
@@ -888,7 +906,7 @@ class ChatBox extends React.Component {
       loadingNext,
       messageIdEditing,
       messageIdHovering,
-      infoUserTip
+      infoUserTip,
     } = this.state;
     const { t, roomInfo, isReadOnly, roomId, allMembers } = this.props;
     const currentUserInfo = this.props.userContext.info;
@@ -909,8 +927,8 @@ class ChatBox extends React.Component {
     return (
       <Content className="chat-room">
         <div id="_profileTip" className="profileTooltip tooltip tooltip--white" role="tooltip">
-          <div className="_cwTTTriangle tooltipTriangle tooltipTriangle--whiteTop"></div>
-          { this.generateMsgContent(infoUserTip) }
+          <div className="_cwTTTriangle tooltipTriangle tooltipTriangle--whiteTop" />
+          {this.generateMsgContent(infoUserTip)}
         </div>
         <div
           className="list-message"
@@ -961,7 +979,13 @@ class ChatBox extends React.Component {
                             <List.Item.Meta
                               className="show-infor"
                               avatar={<Avatar src={getUserAvatarUrl(message.user_info.avatar)} />}
-                              title={<p>{nicknames[message.user_info._id] ? nicknames[message.user_info._id] : message.user_info.name}</p>}
+                              title={
+                                <p>
+                                  {nicknames[message.user_info._id]
+                                    ? nicknames[message.user_info._id]
+                                    : message.user_info.name}
+                                </p>
+                              }
                             />
                           </div>
                         </Popover>
@@ -1004,7 +1028,11 @@ class ChatBox extends React.Component {
                               id={message._id}
                               data-rid={roomId}
                               data-mid={message.user_info._id}
-                              data-name={nicknames[message.user_info._id] ? nicknames[message.user_info._id] : message.user_info.name}
+                              data-name={
+                                nicknames[message.user_info._id]
+                                  ? nicknames[message.user_info._id]
+                                  : message.user_info.name
+                              }
                             >
                               <Icon type="enter" /> {t('button.reply')}
                             </Button>
@@ -1014,11 +1042,7 @@ class ChatBox extends React.Component {
                             trigger="click"
                             onVisibleChange={this.handleVisibleReaction}
                           >
-                            <Button
-                              type="link"
-                              id={message._id}
-                              data-mid={message.user_info._id}
-                            >
+                            <Button type="link" id={message._id} data-mid={message.user_info._id}>
                               <Icon type="heart" theme="twoTone" twoToneColor="#eb2f96" /> {t('button.reaction')}
                             </Button>
                           </Popover>
@@ -1030,13 +1054,11 @@ class ChatBox extends React.Component {
                           >
                             <Icon type="rollback" /> {t('button.quote')}
                           </Button>
-                          <Button
-                            type="link"
-                            id={message._id}
-                            onClick={this.deleteMessage}
-                          >
-                            <Icon type="delete" /> {t('button.delete')}
-                          </Button>
+                          {currentUserInfo._id === message.user_info._id && !isReadOnly && (
+                            <Button type="link" id={message._id} onClick={this.deleteMessage}>
+                              <Icon type="delete" /> {t('button.delete')}
+                            </Button>
+                          )}
                         </div>
                       )}
                     </Col>

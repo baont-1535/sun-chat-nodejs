@@ -97,7 +97,7 @@ export function updateMessage(roomId, messageId, data) {
 }
 
 export function deleteMessage({ roomId, messageId }) {
-  return new Http().authenticated().post(`/rooms/${roomId}/delete-messages/${messageId}`);
+  return new Http().authenticated().delete(`/rooms/${roomId}/messages/${messageId}`);
 }
 
 export function getDirectRoomId(userId) {

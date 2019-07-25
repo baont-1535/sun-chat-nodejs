@@ -153,8 +153,8 @@ router.post(
   roomsController.updateMessage
 );
 
-router.post(
-  '/rooms/:roomId/delete-messages/:messageId',
+router.delete(
+  '/rooms/:roomId/messages/:messageId',
   [auth.jwtMiddleware, authorization.room.updateMessage],
   roomsController.deleteMessage
 );
