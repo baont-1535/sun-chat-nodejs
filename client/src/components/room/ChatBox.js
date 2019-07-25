@@ -10,6 +10,7 @@ import {
   updateMessage,
   getDirectRoomId,
   getListNicknameByUserInRoom,
+  deleteMessage,
 } from './../../api/room.js';
 import {
   addContact,
@@ -132,6 +133,18 @@ class ChatBox extends React.Component {
 
     this.socket.on('update_direct_room_id', userId => {
       this.getDirectRoom(userId);
+    });
+
+    this.socket.on('response-after-action-delete-message', msgId => {
+      if (msgId) {
+        let listMsg = this.state.messages.filter(msg => {
+          return msg._id !== msgId;
+        });
+
+        this.setState({
+          messages: listMsg,
+        });
+      }
     });
 
     if (!localStorage.getItem('descW')) {
@@ -633,10 +646,16 @@ class ChatBox extends React.Component {
   };
   // for quote msg - END
 
-  // for reaction msg - BEGIN
-  reactionMessage = e => {
+  deleteMessage = e => {
+    if (e.currentTarget.id) {
+      let params = {
+        roomId: this.props.roomId,
+        messageId: e.currentTarget.id,
+      }
 
-  }
+      deleteMessage(params);
+    }
+  };
 
   handleVisibleReaction = visible => {
 
@@ -967,8 +986,9 @@ class ChatBox extends React.Component {
                       </h4>
                     </Col>
                     <Col span={24} style={{ position: 'relative' }}>
-                      {message.is_notification == false && (
+                      {message.is_notification === false && (
                         <div
+                          className="optionChangeMessage"
                           id={'action-button-' + message._id}
                           style={{ textAlign: 'right', position: 'absolute', bottom: '0', right: '0', display: 'none' }}
                         >
@@ -1009,6 +1029,13 @@ class ChatBox extends React.Component {
                             data-mid={message.user_info._id}
                           >
                             <Icon type="rollback" /> {t('button.quote')}
+                          </Button>
+                          <Button
+                            type="link"
+                            id={message._id}
+                            onClick={this.deleteMessage}
+                          >
+                            <Icon type="delete" /> {t('button.delete')}
                           </Button>
                         </div>
                       )}
