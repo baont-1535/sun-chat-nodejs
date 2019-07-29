@@ -3,6 +3,7 @@ import { Layout, Icon, Menu, Avatar, message, Typography, Dropdown, List, Button
 import InfiniteScroll from 'react-infinite-scroller';
 import { checkExpiredToken, saveSizeComponentsChat } from './../../helpers/common';
 import { getListRoomsByUser, getQuantityRoomsByUserId, togglePinnedRoom } from './../../api/room';
+// import { togglePinnedGroup } from './../../api/group';
 import { Link } from 'react-router-dom';
 import config from './../../config/listRoom';
 import { room } from './../../config/room';
@@ -13,13 +14,14 @@ import { withRouter } from 'react-router';
 import { getRoomAvatarUrl, getUserAvatarUrl } from './../../helpers/common';
 import avatarConfig from './../../config/avatar';
 import { Resizable } from 're-resizable';
+import SettingRoom from '../SettingRoom';
 const { Sider } = Layout;
 
 class Sidebar extends React.Component {
   static contextType = SocketContext;
 
   state = {
-    rooms: [],
+    list_chat: [],
     error: '',
     loading: true,
     hasMore: true,
@@ -29,19 +31,50 @@ class Sidebar extends React.Component {
     selected_room: null,
   };
 
-  fetchData = (page, filter_type, resetListRooms = false) => {
+  fetchData = (page, filter_type, resetListChat = false) => {
     getListRoomsByUser(page, filter_type).then(res => {
+      let chats = this.formatListChat(res.data);
+
       this.setState({
-        rooms: resetListRooms ? res.data : [...this.state.rooms, ...res.data],
+        list_chat: resetListChat ? res.data : [...this.state.list_chat, ...chats],
         page,
         loading: false,
       });
     });
   };
 
+  formatListChat = (data) => {
+    let chats = [];
+
+    data.map(chat => {
+      if (chat.room_group && chat.room_group._id) {
+        let group = chat.room_group;
+        group.list_room = [];
+
+        data.map(item => {
+          if (item.room_group && item.room_group._id === group._id) {
+            delete item.room_group;
+            group.list_room.push(item);
+            item.reject = true;
+          }
+        });
+
+        chats.push(group);
+      } else {
+        chats.push(chat);
+      }
+    });
+    chats = chats.filter(chat => {
+      return chat.reject === undefined;
+    });
+
+    return chats;
+  }
+
   getListRoom() {
     const { socket } = this.context;
     const { filter_type, page } = this.state;
+
     socket.emit('get_list_room', {
       page: 0,
       filter_type,
@@ -74,13 +107,13 @@ class Sidebar extends React.Component {
 
       const { socket } = this.context;
 
-      socket.on('action_room', () => {
+      socket.on('reset-list-chat', () => {
         this.getListRoom();
       });
 
-      socket.on('update_list_room', rooms => {
+      socket.on('update_list_room', list_chat => {
         this.setState({
-          rooms: rooms,
+          list_chat: this.formatListChat(list_chat),
         });
       });
 
@@ -89,66 +122,78 @@ class Sidebar extends React.Component {
       });
 
       socket.on('remove_from_list_rooms', res => {
-        this.setState({
-          rooms: this.state.rooms.filter(function(value, index, arr) {
-            return value._id != res.roomId;
-          }),
+        let chats = this.state.list_chat.filter(function(value) {
+          return value._id !== res.roomId;
         });
 
-        if (this.state.selected_room == res.roomId) {
+        if (chats.length !== this.state.list_chat.length) {
+          for (let i = 0; i < chats.length; i++) {
+            if (chats[i].list_room) {
+              chats[i].list_room = chats[i].list_room.filter(function(value) {
+                return value._id !== res.roomId;
+              });
+            }
+          }
+        }
+
+        this.setState({
+          list_chat: chats,
+        });
+
+        if (this.state.selected_room === res.roomId) {
           this.props.history.push(`/rooms/${this.props.userContext.my_chat_id}`);
         }
       });
 
       socket.on('update_direct_room_info', res => {
         this.setState(prevState => ({
-          rooms: prevState.rooms.map(room =>
-            room._id === res._id
+          list_chat: prevState.list_chat.map(chat =>
+            chat._id === res._id
               ? {
-                  ...room,
+                  ...chat,
                   name: res.name,
-                  avatar: res.avatar !== undefined ? res.avatar : room.avatar,
+                  avatar: res.avatar !== undefined ? res.avatar : chat.avatar,
                 }
-              : room
+              : chat
           ),
         }));
       });
 
       socket.on('update_mychat_info', res => {
         this.setState(prevState => ({
-          rooms: prevState.rooms.map(room =>
-            room._id === res._id
+          list_chat: prevState.list_chat.map(chat =>
+            chat._id === res._id
               ? {
-                  ...room,
+                  ...chat,
                   name: res.name,
-                  avatar: res.avatar !== undefined ? res.avatar : room.avatar,
+                  avatar: res.avatar !== undefined ? res.avatar : chat.avatar,
                 }
-              : room
+              : chat
           ),
         }));
       });
 
       socket.on('update_list_rooms_when_receive_msg', res => {
-        let room = this.getRoomById(this.state.rooms, res.room._id);
+        let chat = this.getChatById(this.state.list_chat, res.room._id);
 
-        if (room) {
-          room.last_created_msg = res.room.last_created_msg;
+        if (chat) {
+          chat.last_created_msg = res.room.last_created_msg;
 
-          if (res.sender != this.props.userContext.info._id) {
-            room.quantity_unread = res.room.quantity_unread;
+          if (res.sender !== this.props.userContext.info._id) {
+            chat.quantity_unread = res.room.quantity_unread;
           }
 
-          this.setState({ rooms: this.state.rooms.sort(this.compareRoom) });
+          this.setState({ list_chat: this.state.list_chat.sort(this.compareRoom) });
         } else {
           this.addToListRooms(res.room, this.state.filter_type);
         }
       });
 
       socket.on('update_quantity_unread', res => {
-        let room = this.getRoomById(this.state.rooms, res.room_id);
+        let chat = this.getChatById(this.state.list_chat, res.room_id);
 
-        if (room) {
-          room.quantity_unread = res.quantity_unread;
+        if (chat) {
+          chat.quantity_unread = res.quantity_unread;
           this.forceUpdate();
         }
       });
@@ -161,14 +206,14 @@ class Sidebar extends React.Component {
   }
 
   handleInfiniteOnLoad = () => {
-    let { page, rooms, quantity_chats, filter_type } = this.state;
+    let { page, list_chat, quantity_chats, filter_type } = this.state;
 
     page = parseInt(page) + 1;
     this.setState({
       loading: true,
     });
 
-    if (rooms.length >= quantity_chats) {
+    if (list_chat.length >= quantity_chats) {
       message.warning(this.props.t('notice.action.end_of_list'));
       this.setState({
         hasMore: false,
@@ -185,7 +230,7 @@ class Sidebar extends React.Component {
     let page = 1;
 
     this.setState({
-      rooms: [],
+      list_chat: [],
       loading: true,
       hasMore: true,
       page,
@@ -202,17 +247,32 @@ class Sidebar extends React.Component {
   };
 
   handlePinned = e => {
-    let roomId = e.target.value;
+    let id = e.target.value;
 
-    togglePinnedRoom(roomId).then(res => {
-      this.getListRoom();
-    });
+    if (e.target.classList.contains('group')) {
+      // togglePinnedGroup(id, e.target.classList.contains('pinned')).then((res) => {
+      //   message.success(res.data.message);
+      //   this.getListRoom();
+      // });
+    } else {
+      togglePinnedRoom(id).then(() => {
+        this.getListRoom();
+      });
+    }
   };
 
-  getRoomById = (rooms, roomId) => {
-    for (let i = rooms.length - 1; i >= 0; i--) {
-      if (rooms[i]._id === roomId) {
-        return rooms[i];
+  getChatById = (list_chat, roomId) => {
+    for (let i = list_chat.length - 1; i >= 0; i--) {
+      if (list_chat[i]._id === roomId) {
+        return list_chat[i];
+      }
+
+      if (list_chat.list_room) {
+        let room = list_chat.list_room.filter(item => {
+          return item._id === roomId;
+        });
+
+        if (room) return room;
       }
     }
 
@@ -220,11 +280,11 @@ class Sidebar extends React.Component {
   };
 
   addToListRooms = (newRoom, filter_type) => {
-    let { rooms } = this.state;
+    let { list_chat } = this.state;
     let indexUnpinned = -1;
 
-    for (var i = 0; i < rooms.length; i++) {
-      if (rooms[i].pinned == false) {
+    for (let i = 0; i < list_chat.length; i++) {
+      if (list_chat[i].pinned === false) {
         indexUnpinned = i;
         break;
       }
@@ -244,22 +304,22 @@ class Sidebar extends React.Component {
           (filter_type === config.FILTER_TYPE.LIST_ROOM.UNREAD.VALUE &&
             newRoom.quantity_unread > 0)
         ) {
-          rooms.splice(0, 0, newRoom);
+          list_chat.splice(0, 0, newRoom);
 
-          if (hasMore === true) rooms.splice(rooms.length - 1, 1);
+          if (hasMore === true) list_chat.splice(list_chat.length - 1, 1);
         }
       } else {
         if (indexUnpinned === -1) {
-          rooms.push(newRoom);
+          list_chat.push(newRoom);
         } else {
-          rooms.splice(indexUnpinned, 0, newRoom);
+          list_chat.splice(indexUnpinned, 0, newRoom);
 
           if (quantity_chats % config.LIMIT_ITEM_SHOW.ROOM === 0) { this.setState({hasMore: true}); }
-          if (quantity_chats >= config.LIMIT_ITEM_SHOW.ROOM) { rooms.splice(rooms.length - 1, 1); }
+          if (quantity_chats >= config.LIMIT_ITEM_SHOW.ROOM) { list_chat.splice(list_chat.length - 1, 1); }
         }
       }
 
-      this.setState({rooms});
+      this.setState({list_chat});
     }
   };
 
@@ -294,7 +354,7 @@ class Sidebar extends React.Component {
   };
 
   render() {
-    const { rooms } = this.state;
+    const { list_chat } = this.state;
     const { t } = this.props;
     const list_flag = config.FILTER_TYPE.LIST_ROOM;
     const active = 'ant-dropdown-menu-item-selected';
@@ -312,48 +372,94 @@ class Sidebar extends React.Component {
         </Menu.Item>
       );
 
-      if (list_flag[index].VALUE == this.state.filter_type) {
+      if (list_flag[index].VALUE === this.state.filter_type) {
         selected_content = t(list_flag[index].TITLE);
       }
     }
     const cond_filter = <Menu onClick={this.onClick.bind(this.context)}>{condFilter}</Menu>;
 
     let renderHtml =
-      rooms.length > 0 &&
-      rooms.map((item, index) => {
+      list_chat.length > 0 &&
+      list_chat.map((item, index) => {
+        const link = item.list_room ? item.list_room[0]._id : item._id;
+        const tick = item.list_room ? 'group' : '';
+
         return (
-          <List.Item
-            key={index}
-            className={item._id == this.state.selected_room ? 'item-active' : ''}
-            data-room-id={item._id}
-            onClick={this.updateSelectedRoom}
-          >
-            <Link to={`/rooms/${item._id}`}>
-              <div className="avatar-name">
-                <Avatar
-                  className={
-                    item.type === room.ROOM_TYPE.DIRECT_CHAT
-                      ? `_avatar _avatar_Uid_${item.members}`
-                      : `_avatar _avatar_Rid_${item._id}`
-                  }
-                  size={avatarConfig.AVATAR.SIZE.MEDIUM}
-                  src={
-                    item.type === room.ROOM_TYPE.GROUP_CHAT
-                      ? getRoomAvatarUrl(item.avatar)
-                      : getUserAvatarUrl(item.avatar)
-                  }
-                />
-                &nbsp;&nbsp;
-                <span className="nav-text">{item.name}</span>
-              </div>
-              <div className="state-room">
-                {item.quantity_unread > 0 && <Typography.Text mark>{item.quantity_unread}</Typography.Text>}
-                <Button className={item.pinned ? 'pin pinned' : 'pin'} onClick={this.handlePinned} value={item._id}>
-                  <Icon type="pushpin" />
-                </Button>
-              </div>
-            </Link>
-          </List.Item>
+          <div key={index}>
+            <List.Item
+              key={index}
+              className={item._id === this.state.selected_room ? 'item-active' : ''}
+              data-room-id={item._id}
+            >
+              <Link to={`/rooms/${link}`}>
+                <div className="avatar-name">
+                  <Avatar
+                    className={
+                      item.type === room.ROOM_TYPE.DIRECT_CHAT
+                        ? `_avatar _avatar_Uid_${item.members}`
+                        : `_avatar _avatar_Rid_${item._id}`
+                    }
+                    size={avatarConfig.AVATAR.SIZE.MEDIUM}
+                    src={
+                      item.type === room.ROOM_TYPE.GROUP_CHAT
+                        ? getRoomAvatarUrl(item.avatar)
+                        : getUserAvatarUrl(item.avatar)
+                    }
+                  />
+                  &nbsp;&nbsp;
+                  <span className="nav-text">{item.name}</span>
+                </div>
+                <div className="state-room">
+                  {item.quantity_unread > 0 && !item.list_room && (
+                    <Typography.Text mark>{item.quantity_unread}</Typography.Text>
+                  )}
+                  <Button className={item.pinned ? `pin pinned ${tick}` : `pin ${tick}`} onClick={this.handlePinned} value={item._id}>
+                    <Icon type="pushpin" />
+                  </Button>
+                </div>
+              </Link>
+            </List.Item>
+            {item.list_room &&
+              item.list_room.map((subRoom, index) => {
+                return (
+                  <List.Item
+                    key={index}
+                    className={subRoom._id === this.state.selected_room ? 'item-active sub-room' : 'sub-room'}
+                    data-room-id={subRoom._id}
+                  >
+                    <Link to={`/rooms/${subRoom._id}`}>
+                      <div className="avatar-name">
+                        <Avatar
+                          className={
+                            item.type === room.ROOM_TYPE.DIRECT_CHAT
+                              ? `_avatar _avatar_Uid_${item.members}`
+                              : `_avatar _avatar_Rid_${item._id}`
+                          }
+                          size={avatarConfig.AVATAR.SIZE.MEDIUM}
+                          src={
+                            item.type === room.ROOM_TYPE.GROUP_CHAT
+                              ? getRoomAvatarUrl(item.avatar)
+                              : getUserAvatarUrl(item.avatar)
+                          }
+                        />
+                        &nbsp;&nbsp;
+                        <span className="nav-text">{subRoom.name}</span>
+                      </div>
+                      <div className="state-room">
+                        {subRoom.quantity_unread > 0 && <Typography.Text mark>{subRoom.quantity_unread}</Typography.Text>}
+                        <Button
+                          className={subRoom.pinned ? 'pin pinned' : 'pin'}
+                          onClick={this.handlePinned}
+                          value={subRoom._id}
+                        >
+                          <Icon type="pushpin" />
+                        </Button>
+                      </div>
+                    </Link>
+                  </List.Item>
+                );
+              })}
+          </div>
         );
       });
 
@@ -372,13 +478,16 @@ class Sidebar extends React.Component {
           }}
         >
           <Sider className="side-bar">
-            <div id="div-filter">
-              <Dropdown overlay={cond_filter}>
-                <a className="ant-dropdown-link">
-                  <Icon type="filter" />&nbsp;
-                  {selected_content}
-                </a>
-              </Dropdown>
+            <div id="head-sideBar">
+              <div id="div-filter">
+                <Dropdown overlay={cond_filter}>
+                  <a className="ant-dropdown-link">
+                    <Icon type="filter" />&nbsp;
+                    {selected_content}
+                  </a>
+                </Dropdown>
+              </div>
+              <SettingRoom />
             </div>
             <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
               <div className="sidebar-infinite-container">

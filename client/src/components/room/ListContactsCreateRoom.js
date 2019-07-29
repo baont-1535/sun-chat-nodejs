@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { withNamespaces } from 'react-i18next';
 import { withRouter } from 'react-router';
 import 'antd/dist/antd.css';
-import { List, Avatar, Button, message, Spin, Alert, Checkbox, Select, Form, Input } from 'antd';
+import { List, Avatar, Alert, Checkbox, Select, Form, Input } from 'antd';
 import { getLimitListContacts } from '../../api/contact';
 import { ROLES } from '../../config/member';
 import { room } from '../../config/room';
@@ -127,7 +127,7 @@ class ListContactCreateRoom extends Component {
     const { t, form } = this.props;
     const { error, checkedList, indeterminate, checkAll, contacts } = this.state;
 
-    let options = Object.values(ROLES).map(role => <Option value={role.value}>{t('member:' + role.title)}</Option>)
+    let options = Object.values(ROLES).map(role => <Option value={role.value} key={role.value}>{t('member:' + role.title)}</Option>)
 
     return (
       <React.Fragment>

@@ -1,0 +1,19 @@
+{
+  "validate": {
+    "img_type": "You can only upload {{types}} file!",
+    "img_size": "Image must smaller than {{max}} MB!",
+    "amount_char": "Only can enter from {{min}} to {{max}} characters!"
+  },
+  "title": {
+    "create_group": "Gross into new group",
+    "edit_group": "Edit group",
+    "upload": "Upload",
+    "group_name": "Group Chat Name",
+    "group_des": "Description",
+    "add_group": "Add group"
+  },
+  "button": {
+    "cancel": "Cancel",
+    "submit": "Submit"
+  }
+}

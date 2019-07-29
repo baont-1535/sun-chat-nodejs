@@ -5,7 +5,6 @@ import InputSearch from './../InputSearch';
 import ModalListContacts from '../modals/contact/ModalListContacts';
 import ModalListContactRequest from '../modals/contact/ModalListContactRequest';
 import ModalAddContact from '../modals/contact/ModalAddContact';
-import CreateRoom from '../room/CreateRoom';
 import ChangeLanguage from './../ChangeLanguage';
 import { Link } from 'react-router-dom';
 import { SocketContext } from './../../context/SocketContext';
@@ -120,13 +119,12 @@ class Head extends React.Component {
     return checkExpiredToken() ? (
       <Header style={{ background: '#fff', padding: 0 }}>
         <Row type="flex" justify="end" align="middle">
-          <Col span={5}>
+          <Col span={10}>
             <InputSearch />
           </Col>
-          <Col span={10} />
-          <Col span={4}>
+
+          <Col span={9}>
             <div className="options-contact-room">
-              <CreateRoom />
               <ModalAddContact />
               <ModalListContactRequest />
               <ModalListContacts />

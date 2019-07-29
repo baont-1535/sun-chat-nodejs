@@ -4,7 +4,7 @@ import detector from 'i18next-browser-languagedetector';
 import backend from 'i18next-xhr-backend';
 import systemConfig from './config/configServer';
 
-const listFile = ['auth', 'user', 'contact', 'listRoom', 'member', 'room', 'message', 'task', 'notification', 'emoji', 'liveChat'];
+const listFile = ['auth', 'user', 'contact', 'listRoom', 'member', 'room', 'message', 'task', 'notification', 'emoji', 'liveChat', 'group'];
 
 function getFileLang(lang = 'en') {
   let tmp = {};

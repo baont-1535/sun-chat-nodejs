@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import { withNamespaces } from 'react-i18next';
 import { withRouter } from 'react-router';
 import 'antd/dist/antd.css';
-import ListContactCreateRoom from './ListContactsCreateRoom.js';
-import { createRoom, editRoom } from '../../api/room.js';
-import { room } from '../../config/room';
+import ListContactCreateRoom from '../../room/ListContactsCreateRoom.js';
+import { createRoom, editRoom } from '../../../api/room.js';
+import { room } from '../../../config/room';
 import { Row, Col, Card, Form, Input, Icon, Button, Modal, message, Checkbox, Upload, Typography } from 'antd';
-import { SocketContext } from './../../context/SocketContext';
-import { getRoomAvatarUrl } from './../../helpers/common';
-import avatarConfig from './../../config/avatar';
+import { SocketContext } from '../../../context/SocketContext';
+import { getRoomAvatarUrl } from '../../../helpers/common';
+import avatarConfig from '../../../config/avatar';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -77,7 +77,7 @@ class FormCreateRoom extends Component {
   componentWillReceiveProps(nextProps) {
     const { roomInfo } = nextProps;
 
-    if (nextProps.roomInfo._id != this.props.roomInfo._id) {
+    if (nextProps.roomInfo._id !== this.props.roomInfo._id) {
       this.invitationType = roomInfo.invitation_type;
       this.invitationCode = roomInfo.invitation_code;
       this.setState({

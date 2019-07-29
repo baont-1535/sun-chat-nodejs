@@ -1,0 +1,19 @@
+{
+  "validate": {
+    "img_type": "Bạn chỉ có thể tải lên tệp {{types}} !",
+    "img_size": "File ảnh phải nhỏ hơn {{max}} MB!",
+    "amount_char": "Chỉ có thể nhập từ {{min}} đến {{max}} ký tự!"
+  },
+  "title": {
+    "create_group": "Gộp nhóm trò chuyện",
+    "edit_group": "Chỉnh sửa nhóm trò chuyện",
+    "upload": "Tải lên",
+    "group_name": "Tên nhóm trò chuyện",
+    "group_des": "Mô tả",
+    "add_room": "Thêm nhóm"
+  },
+  "button": {
+    "cancel": "Hủy",
+    "submit": "Gửi"
+  }
+}

@@ -57,7 +57,7 @@ head .delete-member {
 .header-chat-room {
   background-color: #fff;
   height: $header-height-chatroom;
-  border: none;
+  border-bottom: 1px groove #26f297;
   padding: 0px;
   > div {
     height: 100%;
@@ -335,6 +335,10 @@ head .delete-member {
 
 .ant-popover-inner-content {
   padding: 5px;
+  .anticon {
+    color: #3701fd;
+    margin-right: 5px;
+  }
 }
 
 .infor-name {
@@ -432,6 +436,9 @@ pre {
   display: flex;
   justify-content: flex-end;
 
+  .list-member-chat-room {
+    min-width: 25px;
+  }
   .ant-divider-vertical {
     height: 30px;
   }

@@ -1,16 +1,36 @@
-#div-filter {
-  height: $header-height;
-  background-color: transparent;
-  margin: 0;
-  padding: 20px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
+.anticon-filter {
+  float: right;
+  margin: 3px;
+}
 
-  a {
+#head-sideBar {
+  height: $header-height;
+  background-color: #0e4040;
+  #div-filter {
+    height: 100%;
+    margin: 0;
+    padding: 20px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: #155b5b;
+    text-align: center;
+    width: calc(100% - 50px);
     float: left;
-    font-size: 13px;
-    width: 100%;
-    // color: #fff;
+    a {
+      float: left;
+      font-size: 13px;
+      width: 100%;
+      height: calc(#{$header-height} - 20px);
+      margin-top: -10px;
+      padding-top: 10px;
+      background-color: white;
+      color: #001c2c;
+    }
+  }
+  > span.ant-badge {
+    margin: 20px 0 0 15px;
+    a {
+      color: white;
+    }
   }
 }
 

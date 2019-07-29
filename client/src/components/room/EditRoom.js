@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import 'antd/dist/antd.css';
-import FormCreateRoom from './FormCreateRoom';
+import FormCreateRoom from '../modals/room/FormCreateRoom';
 import { withNamespaces } from 'react-i18next';
 import { withRouter } from 'react-router';
 import { Button } from 'antd';
