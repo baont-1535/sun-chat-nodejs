@@ -37,7 +37,7 @@ import {
   generateRedLine,
   generateMessageHTML,
   handleCancelEdit,
-  handleSendMessage
+  handleSendMessage,
 } from '../../helpers/generateHTML/message';
 import { getUserAvatarUrl, saveSizeComponentsChat, getEmoji } from './../../helpers/common';
 import ModalChooseMemberToCall from './ModalChooseMemberToCall';
@@ -236,7 +236,7 @@ class ChatBox extends React.Component {
           let message = _this.getMessageById(messagesTmp, msgId);
 
           if (message != null) {
-              await Promise.resolve(1);
+            await Promise.resolve(1);
           } else {
             let messageResponse = await getMessageInfo(roomId, msgId);
 
@@ -245,15 +245,14 @@ class ChatBox extends React.Component {
           }
 
           let replyMessageContent = getReplyMessageContent(_this, message);
-          _this.setState({'replyMessageContent': replyMessageContent});
+          _this.setState({ replyMessageContent: replyMessageContent });
         } else {
-          await Promise.reject(new Error("No message id!"));
+          await Promise.reject(new Error('No message id!'));
         }
-
-      } catch(err) {
-        _this.setState({'replyMessageContent': initialState.replyMessageContent});
+      } catch (err) {
+        _this.setState({ replyMessageContent: initialState.replyMessageContent });
       }
-    })
+    });
 
     $(document).on('click', 'body', function(event) {
       let xPosition = 0,
@@ -300,9 +299,11 @@ class ChatBox extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    $('.joinLiveButton').unbind('click').bind('click', e => {
-      this.joinLiveChat(e.currentTarget.dataset.liveId);
-    });
+    $('.joinLiveButton')
+      .unbind('click')
+      .bind('click', e => {
+        this.joinLiveChat(e.currentTarget.dataset.liveId);
+      });
 
     if (prevProps.loadedRoomInfo && !this.props.loadedRoomInfo) {
       document.getElementById('msg-content').value = '';
@@ -352,7 +353,7 @@ class ChatBox extends React.Component {
     const position = $('#originMsgTooltip').position();
 
     $('#originMsgTooltip').css({
-      top: (position.top + (225 - height)) + 'px',
+      top: position.top + (225 - height) + 'px',
       left: position.left + 'px',
     });
   }
@@ -373,17 +374,21 @@ class ChatBox extends React.Component {
       },
     };
 
-    offerJoinLiveChat(param).then(res => {
-      if (res.data.success) {
-        window.open(
-          `${window.location.href}/live/${liveChatId}`,
-          '_blank',
-          'toolbar=yes, width=' + window.innerWidth + ',height=' + window.innerHeight
-        );
-      } else {
-        message.error(res.data.message);
-      }
-    });
+    offerJoinLiveChat(param)
+      .then(res => {
+        if (res.data.success) {
+          window.open(
+            `${window.location.href}/live/${liveChatId}`,
+            '_blank',
+            'toolbar=yes, width=' + window.innerWidth + ',height=' + window.innerHeight
+          );
+        } else {
+          message.error(res.data.message);
+        }
+      })
+      .catch(err => {
+        message.error(err.response.data.message);
+      });
   };
 
   handleScroll = e => {
@@ -584,9 +589,9 @@ class ChatBox extends React.Component {
 
     return (
       <div className="empty-reply-msg">
-        <p> { t('messages.no_reply_msg')} </p>
+        <p> {t('messages.no_reply_msg')} </p>
       </div>
-    )
+    );
   };
 
   onChangeTab = activeKey => {
@@ -729,9 +734,9 @@ class ChatBox extends React.Component {
   // process for popover - END
   // Sort reaction array
   mapOrder = (array, order, objKey) => {
-    array.sort( function (a, b) {
+    array.sort(function(a, b) {
       let A = a[objKey.key][objKey.subKey],
-          B = b[objKey.key][objKey.subKey];
+        B = b[objKey.key][objKey.subKey];
 
       if (order.indexOf(A) > order.indexOf(B)) {
         return 1;
@@ -826,7 +831,9 @@ class ChatBox extends React.Component {
                   onVisibleChange={this.handleVisibleChangePopoverTo}
                 >
                   <Badge className="header-icon" type="primary">
-                    <a href="javascript:;">{roomInfo.type !== room.ROOM_TYPE.MY_CHAT ? <strong>{t('to')}</strong> : ''}</a>
+                    <a href="javascript:;">
+                      {roomInfo.type !== room.ROOM_TYPE.MY_CHAT ? <strong>{t('to')}</strong> : ''}
+                    </a>
                   </Badge>
                 </Popover>
                 <ModalChooseMemberToCall
@@ -840,7 +847,9 @@ class ChatBox extends React.Component {
                   }}
                 />
               </React.Fragment>
-            ) : ''}
+            ) : (
+              ''
+            )}
             <a onClick={handlersMessage.actionFunc.infoBlock} className="block">
               <strong>{block.INFO_BLOCK}</strong>
             </a>

@@ -257,9 +257,17 @@ router.post('/nicknames', auth.jwtMiddleware, nicknamesController.edit);
 // Live Chat
 router.post('/live-chat/create', [auth.jwtMiddleware], callsController.create);
 
-router.post('/live-chat/offer-join', [auth.jwtMiddleware], callsController.offerBeJoined);
+router.post(
+  '/live-chat/offer-join',
+  [auth.jwtMiddleware, authorization.calls.notConnected],
+  callsController.offerBeJoined
+);
 
-router.post('/live-chat/direct-join', [auth.jwtMiddleware], callsController.directJoin);
+router.post(
+  '/live-chat/direct-join',
+  [auth.jwtMiddleware, authorization.calls.notConnected, authorization.calls.notWaitingAndConnected],
+  callsController.directJoin
+);
 
 router.post('/live-chat/check-member', [auth.jwtMiddleware], callsController.checkMember);
 

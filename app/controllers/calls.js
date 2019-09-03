@@ -50,6 +50,7 @@ exports.offerBeJoined = async (req, res) => {
     masterId = liveChat.member.user_id;
     const io = req.app.get('socketIO');
     io.to(masterId).emit('change-offer-list', { roomId, userId, info });
+    await Room.setStatusMemberLiveChat(roomId, liveChatId, userId, config.CALL.PARTICIPANT.STATUS.WAITING);
     message = '';
   }
 
@@ -107,7 +108,12 @@ exports.acceptMember = async (req, res) => {
   }
 
   try {
-    const result = await Room.acceptMemberLiveChat(roomId, liveChatId, memberId);
+    const result = await Room.setStatusMemberLiveChat(
+      roomId,
+      liveChatId,
+      memberId,
+      config.CALL.PARTICIPANT.STATUS.CONNECTING
+    );
 
     if (result) {
       io.to(memberId).emit('be-accepted-by-master', { accepted: true });

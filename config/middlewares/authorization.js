@@ -496,7 +496,55 @@ exports.calls = {
 
       if (!hasMembers) {
         return res.status(403).json({
-          message: __('room.not_exist_member'),
+          message: __('room.member_not_exist'),
+        });
+      }
+
+      next();
+    } catch (err) {
+      channel.error(err);
+
+      return res.status(500).json({
+        message: __('error.common'),
+      });
+    }
+  },
+
+  notConnected: async function(req, res, next) {
+    let { roomId, liveChatId } = req.body;
+    let memberId = req.decoded._id;
+
+    try {
+      const memberConnecting = await Room.getLiveChat(roomId, memberId, liveChatId);
+
+      if (memberConnecting) {
+        return res.status(403).json({
+          message: __('room.member_existed'),
+        });
+      }
+
+      next();
+    } catch (err) {
+      channel.error(err);
+
+      return res.status(500).json({
+        message: __('error.common'),
+      });
+    }
+  },
+
+  notWaitingAndConnected: async function(req, res, next) {
+    let { roomId, liveChatId } = req.body;
+    let memberId = req.decoded._id;
+    const findMaster = false,
+      both_waiting_connecting = true;
+
+    try {
+      const member = await Room.getLiveChat(roomId, memberId, liveChatId, findMaster, both_waiting_connecting);
+
+      if (member) {
+        return res.status(403).json({
+          message: __('room.user_waiting_or_connected'),
         });
       }
 

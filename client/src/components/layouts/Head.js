@@ -90,7 +90,11 @@ class Head extends React.Component {
         } else {
           message.error(res.data.message);
         }
+      }).catch(err => {
+        message.error(err.response.data.message);
       });
+
+      this.disableModal();
     }
   };
 

@@ -242,12 +242,12 @@ RoomSchema.statics = {
           createdAt: 1,
           quantity_unread: { $size: '$message_able' },
           members: {
-            $cond : {
+            $cond: {
               if: { $eq: ['$type', config.ROOM_TYPE.DIRECT_CHAT] },
               then: { $arrayElemAt: ['$members.user_info._id', 0] },
               else: '',
-            }
-          }
+            },
+          },
         },
       }
     );
@@ -1814,8 +1814,16 @@ RoomSchema.statics = {
     ).exec();
   },
 
-  async getLiveChat(roomId, userId = null, liveChatId = null, findMaster = false) {
-    let cond = [{ $eq: ['$$mem.status', config.CALL.PARTICIPANT.STATUS.CONNECTING] }];
+  async getLiveChat(roomId, userId = null, liveChatId = null, findMaster = false, both_waiting_connecting) {
+    let cond = [];
+
+    if (both_waiting_connecting) {
+      cond.push({
+        $in: ['$$mem.status', [config.CALL.PARTICIPANT.STATUS.WAITING, config.CALL.PARTICIPANT.STATUS.CONNECTING]],
+      });
+    } else {
+      cond.push({ $eq: ['$$mem.status', config.CALL.PARTICIPANT.STATUS.CONNECTING] });
+    }
 
     if (findMaster) {
       cond.push({ $eq: ['$$mem.is_caller', true] });
@@ -1851,13 +1859,7 @@ RoomSchema.statics = {
       {
         $project: {
           liveId: '$calls._id',
-          is_type_video: {
-            $cond: {
-              if: { $eq: ['$calls.type', config.CALL.TYPE.VIDEO_CHAT] },
-              then: true,
-              else: false,
-            },
-          },
+          is_type_video: { $eq: ['$calls.type', config.CALL.TYPE.VIDEO_CHAT] },
           member: { $arrayElemAt: ['$members', 0] },
         },
       }
@@ -1967,7 +1969,7 @@ RoomSchema.statics = {
     return result;
   },
 
-  addMemberLiveChat: async function(roomId, liveId, memberId) {
+  addMemberLiveChat: async function(roomId, liveId, memberId, status) {
     let result = false;
 
     await this.update(
@@ -1975,7 +1977,7 @@ RoomSchema.statics = {
       {
         $push: {
           'calls.$[i].participants': {
-            status: config.CALL.PARTICIPANT.STATUS.CONNECTING,
+            status: status,
             is_caller: false,
             user_id: memberId,
           },
@@ -1995,22 +1997,14 @@ RoomSchema.statics = {
     return result;
   },
 
-  acceptMemberLiveChat: async function(roomId, liveId, memberId) {
+  setStatusMemberLiveChat: async function(roomId, liveId, memberId, status) {
     const res = await this.checkExistMemberLiveChat(roomId, liveId, memberId);
 
     if (res) {
-      return await this.updateStatusCallMember(
-        roomId,
-        liveId,
-        memberId,
-        false,
-        config.CALL.PARTICIPANT.STATUS.CONNECTING
-      );
+      return await this.updateStatusCallMember(roomId, liveId, memberId, false, status);
     } else {
-      return await this.addMemberLiveChat(roomId, liveId, memberId);
+      return await this.addMemberLiveChat(roomId, liveId, memberId, status);
     }
-
-    return false;
   },
 
   getListNotMemberLiveChat: async function(roomId, liveId) {
