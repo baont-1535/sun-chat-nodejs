@@ -353,6 +353,47 @@ class Sidebar extends React.Component {
     saveSizeComponentsChat();
   };
 
+  generateChatRoom = (index, item, tick = '', first_round = false) => {
+    const link = item.list_room ? item.list_room[0]._id : item._id;
+    return (
+      <List.Item
+        key={index}
+        className={item._id === this.state.selected_room ? `item-active ${first_round? '' : 'sub-room'}` : `${first_round? '' : 'sub-room'}`}
+        data-room-id={item._id}
+      >
+        <Link to={`/rooms/${link}`}>
+          <div className="avatar-name">
+            <Avatar
+              className={
+                item.type === room.ROOM_TYPE.DIRECT_CHAT
+                  ? `_avatar _avatar_Uid_${item.members}`
+                  : `_avatar _avatar_Rid_${item._id}`
+              }
+              size={avatarConfig.AVATAR.SIZE.MEDIUM}
+              src={
+                item.type === room.ROOM_TYPE.GROUP_CHAT
+                  ? getRoomAvatarUrl(item.avatar)
+                  : getUserAvatarUrl(item.avatar)
+              }
+            />
+            &nbsp;&nbsp;
+            <span className="nav-text">{item.name}</span>
+          </div>
+          <div className="state-room">
+            {item.quantity_unread > 0 && !item.list_room && <Typography.Text mark>{item.quantity_unread}</Typography.Text>}
+            <Button
+              className={item.pinned ? `pin pinned ${tick ? tick : ''}` : `pin ${tick ? tick : ''}`}
+              onClick={this.handlePinned}
+              value={item._id}
+            >
+              <Icon type="pushpin" />
+            </Button>
+          </div>
+        </Link>
+      </List.Item>
+    );
+  }
+
   render() {
     const { list_chat } = this.state;
     const { t } = this.props;
@@ -381,84 +422,19 @@ class Sidebar extends React.Component {
     let renderHtml =
       list_chat.length > 0 &&
       list_chat.map((item, index) => {
-        const link = item.list_room ? item.list_room[0]._id : item._id;
         const tick = item.list_room ? 'group' : '';
+        const first_round = true;
 
         return (
           <div key={index}>
-            <List.Item
-              key={index}
-              className={item._id === this.state.selected_room ? 'item-active' : ''}
-              data-room-id={item._id}
-            >
-              <Link to={`/rooms/${link}`}>
-                <div className="avatar-name">
-                  <Avatar
-                    className={
-                      item.type === room.ROOM_TYPE.DIRECT_CHAT
-                        ? `_avatar _avatar_Uid_${item.members}`
-                        : `_avatar _avatar_Rid_${item._id}`
-                    }
-                    size={avatarConfig.AVATAR.SIZE.MEDIUM}
-                    src={
-                      item.type === room.ROOM_TYPE.GROUP_CHAT
-                        ? getRoomAvatarUrl(item.avatar)
-                        : getUserAvatarUrl(item.avatar)
-                    }
-                  />
-                  &nbsp;&nbsp;
-                  <span className="nav-text">{item.name}</span>
-                </div>
-                <div className="state-room">
-                  {item.quantity_unread > 0 && !item.list_room && (
-                    <Typography.Text mark>{item.quantity_unread}</Typography.Text>
-                  )}
-                  <Button className={item.pinned ? `pin pinned ${tick}` : `pin ${tick}`} onClick={this.handlePinned} value={item._id}>
-                    <Icon type="pushpin" />
-                  </Button>
-                </div>
-              </Link>
-            </List.Item>
+            {this.generateChatRoom(index, item, tick, first_round)}
             {item.list_room &&
               item.list_room.map((subRoom, index) => {
                 return (
-                  <List.Item
-                    key={index}
-                    className={subRoom._id === this.state.selected_room ? 'item-active sub-room' : 'sub-room'}
-                    data-room-id={subRoom._id}
-                  >
-                    <Link to={`/rooms/${subRoom._id}`}>
-                      <div className="avatar-name">
-                        <Avatar
-                          className={
-                            item.type === room.ROOM_TYPE.DIRECT_CHAT
-                              ? `_avatar _avatar_Uid_${item.members}`
-                              : `_avatar _avatar_Rid_${item._id}`
-                          }
-                          size={avatarConfig.AVATAR.SIZE.MEDIUM}
-                          src={
-                            item.type === room.ROOM_TYPE.GROUP_CHAT
-                              ? getRoomAvatarUrl(item.avatar)
-                              : getUserAvatarUrl(item.avatar)
-                          }
-                        />
-                        &nbsp;&nbsp;
-                        <span className="nav-text">{subRoom.name}</span>
-                      </div>
-                      <div className="state-room">
-                        {subRoom.quantity_unread > 0 && <Typography.Text mark>{subRoom.quantity_unread}</Typography.Text>}
-                        <Button
-                          className={subRoom.pinned ? 'pin pinned' : 'pin'}
-                          onClick={this.handlePinned}
-                          value={subRoom._id}
-                        >
-                          <Icon type="pushpin" />
-                        </Button>
-                      </div>
-                    </Link>
-                  </List.Item>
+                  this.generateChatRoom(index, subRoom)
                 );
-              })}
+              })
+            }
           </div>
         );
       });

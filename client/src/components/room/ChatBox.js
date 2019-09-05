@@ -1,7 +1,6 @@
 import React from 'react';
 import { withRouter } from 'react-router';
-import { Link } from 'react-router-dom';
-import { Layout, Input, Button, List, Avatar, Icon, Row, Col, Badge, Popover, message, Spin, Tabs } from 'antd';
+import { Layout, Input, Button, Icon, Badge, Popover, message, Spin, Tabs } from 'antd';
 import {
   loadMessages,
   loadPrevMessages,
@@ -24,9 +23,7 @@ import { withUserContext } from './../../context/withUserContext';
 import { withNamespaces } from 'react-i18next';
 import moment from 'moment';
 import { room } from '../../config/room';
-import configEmoji from '../../config/emoji';
-import { messageConfig, block } from '../../config/message';
-import InfiniteScroll from 'react-infinite-scroller';
+import { block } from '../../config/message';
 import '../../scss/messages.scss';
 import handlersMessage from '../../helpers/handlersMessage';
 import { generateListEmoji } from '../../helpers/generateHTML/emoji';
@@ -34,19 +31,15 @@ import { generateListTo } from '../../helpers/generateHTML/to';
 import {
   getReplyMessageContent,
   generateMsgContent,
-  generateRedLine,
   generateMessageHTML,
   handleCancelEdit,
   handleSendMessage
 } from '../../helpers/generateHTML/message';
-import { getUserAvatarUrl, saveSizeComponentsChat, getEmoji } from './../../helpers/common';
+import { saveSizeComponentsChat } from './../../helpers/common';
 import ModalChooseMemberToCall from './ModalChooseMemberToCall';
-import avatarConfig from '../../config/avatar';
 import $ from 'jquery';
-import ModalSetNicknames from '../modals/room/ModalSetNicknames';
 
 const { Content } = Layout;
-const { TabPane } = Tabs;
 const initialState = {
   // for edit msg
   isEditing: false,
@@ -104,7 +97,7 @@ class ChatBox extends React.Component {
 
         if (
           !lastLoadedMsgId ||
-          (redLineMsgId == lastLoadedMsgId && this.checkInView(this.attr.messageRowRefs[lastLoadedMsgId])) ||
+          (redLineMsgId === lastLoadedMsgId && this.checkInView(this.attr.messageRowRefs[lastLoadedMsgId])) ||
           (this.attr.isSender && !this.attr.unreadMsgLineRef)
         ) {
           this.setState({ redLineMsgId: res.message._id });
@@ -201,7 +194,7 @@ class ChatBox extends React.Component {
       let profileTipId = $(e.currentTarget).attr('data-mid');
       let userInfo = {};
 
-      if (profileTipId == currentUserInfo._id) {
+      if (profileTipId === currentUserInfo._id) {
         const { _id, avatar, email, name } = currentUserInfo;
         userInfo = { _id, avatar, email, name };
       } else if (infoUserTips[profileTipId]) {
@@ -256,7 +249,7 @@ class ChatBox extends React.Component {
     })
 
     $(document).on('click', 'body', function(event) {
-      let xPosition = 0,
+      let xPosition,
         yPosition = 0;
       xPosition = event.clientX - $('.profileTooltip').width() / 2;
 
@@ -276,7 +269,7 @@ class ChatBox extends React.Component {
         });
       }
 
-      if (event.target.id == 'target') {
+      if (event.target.id === 'target') {
         $('#_profileTip')
           .css({
             top: yPosition + 'px',
@@ -284,7 +277,7 @@ class ChatBox extends React.Component {
           })
           .show();
         $('#originMsgTooltip').hide();
-      } else if (event.target.id == 'reply-msg') {
+      } else if (event.target.id === 'reply-msg') {
         $('#originMsgTooltip')
           .css({
             top: yPosition + 'px',
@@ -312,7 +305,7 @@ class ChatBox extends React.Component {
       this.setState(initialState);
     }
 
-    if (this.state.messages.length == 0) {
+    if (this.state.messages.length === 0) {
       this.attr.messageRowRefs = new Array();
     }
 
@@ -321,7 +314,7 @@ class ChatBox extends React.Component {
         this.setState({ redLineMsgId: this.props.lastMsgId });
       }
 
-      if (this.attr.hasNextMsg == undefined && this.props.roomInfo.has_unread_msg != undefined) {
+      if (this.attr.hasNextMsg === undefined && this.props.roomInfo.has_unread_msg !== undefined) {
         this.attr.hasNextMsg = this.props.roomInfo.has_unread_msg;
       }
 
@@ -482,7 +475,7 @@ class ChatBox extends React.Component {
             });
           }
         })
-        .catch(error => {
+        .catch(() => {
           this.setState({ loadingPrev: false });
           message.error(t('get_prev_msg.failed'));
         });
@@ -516,7 +509,7 @@ class ChatBox extends React.Component {
             });
           }
         })
-        .catch(error => {
+        .catch(() => {
           this.setState({ loadingNext: false });
           message.error(t('get_next_msg.failed'));
         });
@@ -746,22 +739,18 @@ class ChatBox extends React.Component {
   render() {
     let {
       messages,
-      nicknames,
       redLineMsgId,
       isEditing,
       loadingPrev,
       loadingNext,
-      messageIdEditing,
       infoUserTip,
       replyMessageContent,
-      flagMsgId,
     } = this.state;
-    const { t, roomInfo, isReadOnly, roomId, allMembers } = this.props;
+    const { t, roomInfo, isReadOnly, allMembers, width } = this.props;
     const currentUserInfo = this.props.userContext.info;
     const showListMember = generateListTo(this);
     const showListEmoji = generateListEmoji(this);
-    const redLine = generateRedLine(this);
-    const listMember = allMembers.filter(item => item._id != currentUserInfo._id);
+    const listMember = allMembers.filter(item => item._id !== currentUserInfo._id);
     let nextMsgId = null;
 
     for (let message of messages) {
@@ -771,12 +760,12 @@ class ChatBox extends React.Component {
       }
     }
 
-    if (replyMessageContent == '') {
+    if (replyMessageContent === '') {
       replyMessageContent = this.getEmptyReplyMessage();
     }
 
     return (
-      <Content className="chat-room">
+      <Content className="chat-room" style={{width: width+"px"}}>
         <div id="_profileTip" className="profileTooltip tooltip tooltip--white" role="tooltip">
           <div className="_cwTTTriangle tooltipTriangle tooltipTriangle--whiteTop" />
           {generateMsgContent(this, infoUserTip)}

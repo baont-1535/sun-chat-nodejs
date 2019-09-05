@@ -1,6 +1,6 @@
 import React from 'react';
 import 'antd/dist/antd.css';
-import { Layout, Typography, Row, Col, message, Button, Modal, Input, Icon } from 'antd';
+import { Layout, Typography, Row, Col, message, Button, Modal, Input } from 'antd';
 import { withNamespaces } from 'react-i18next';
 import { withRouter } from 'react-router';
 import { getInforRoom, getMembersOfRoom } from '../../api/room';
@@ -14,7 +14,7 @@ import { room } from '../../config/room';
 import { Resizable } from 're-resizable';
 import { saveSizeComponentsChat, saveSizeComponentsDesc } from '../../helpers/common';
 
-const { Sider, Content } = Layout;
+const { Sider } = Layout;
 const { Text } = Typography;
 
 class RoomDetail extends React.Component {
@@ -29,6 +29,7 @@ class RoomDetail extends React.Component {
     isCopy: false,
     members: [],
     loadedRoomInfo: false,
+    widthBox: 0,
   };
 
   showModal = () => {
@@ -37,19 +38,19 @@ class RoomDetail extends React.Component {
     });
   };
 
-  handleOk = e => {
+  handleOk = () => {
     this.setState({
       visible: false,
     });
   };
 
-  handleCancel = e => {
+  handleCancel = () => {
     this.setState({
       visible: false,
     });
   };
 
-  handleCopyInvitationLink = e => {
+  handleCopyInvitationLink = () => {
     var copyText = document.getElementById('url-invitation');
     copyText.select();
     document.execCommand('copy');
@@ -72,7 +73,7 @@ class RoomDetail extends React.Component {
 
         this.context.socket.emit('open_room', roomId);
       })
-      .catch(error => {
+      .catch(() => {
         this.props.history.push(`/rooms/${this.props.userContext.my_chat_id}`);
         message.error(this.props.t('room_not_exist'));
       });
@@ -133,7 +134,7 @@ class RoomDetail extends React.Component {
     //Listen 'update_member_info' event from server
     socket.on('update_member_info', res => {
       const { members } = this.state;
-      let index = members.findIndex(member => member._id == res._id);
+      let index = members.findIndex(member => member._id === res._id);
       members[index] = { ...members[index], ...res };
 
       this.setState(prevState => ({
@@ -185,6 +186,12 @@ class RoomDetail extends React.Component {
 
   setWidthChatBox = () => {
     saveSizeComponentsChat();
+
+    let sideBarW = localStorage.getItem('sideBarW');
+    let descW = localStorage.getItem('descW');
+    this.setState({
+      width: window.innerWidth - sideBarW - descW,
+    });
   };
 
   setHeightDescription = () => {
@@ -193,7 +200,7 @@ class RoomDetail extends React.Component {
 
   render() {
     const { t } = this.props;
-    const { roomInfo, isAdmin, isCopy, lastMsgId, isReadOnly, members, loadedRoomInfo } = this.state;
+    const { roomInfo, isAdmin, isCopy, lastMsgId, isReadOnly, members, loadedRoomInfo,widthBox } = this.state;
     const invitationURL = `${room.INVITATION_URL}${roomInfo.invitation_code}`;
     const roomId = this.props.match.params.id;
     const minW = room.MIN_WIDTH_DESC * window.innerWidth;
@@ -213,6 +220,7 @@ class RoomDetail extends React.Component {
               allMembers={members}
               roomInfo={roomInfo}
               loadedRoomInfo={loadedRoomInfo}
+              width={widthBox}
             />
             <Resizable
               enable={{ left: true }}
@@ -227,7 +235,7 @@ class RoomDetail extends React.Component {
                     <Text strong> {t('title.room_des')} </Text>
                     {(roomInfo.type === room.ROOM_TYPE.DIRECT_CHAT ||
                       roomInfo.type === room.ROOM_TYPE.MY_CHAT ||
-                      (roomInfo.type == room.ROOM_TYPE.GROUP_CHAT && isAdmin)) && (
+                      (roomInfo.type === room.ROOM_TYPE.GROUP_CHAT && isAdmin)) && (
                       <ModalEditDesc roomDesc={roomInfo.desc} roomId={roomId} />
                     )}
                     <Modal
@@ -260,7 +268,7 @@ class RoomDetail extends React.Component {
                     height={localStorage.getItem('descH') ? localStorage.getItem('descH') : (minH + maxH) / 2}
                   >
                     {roomInfo.desc ? roomInfo.desc : <div className="no-description">{t('no-desc')}</div>}
-                    {roomInfo.type == room.ROOM_TYPE.GROUP_CHAT ? (
+                    {roomInfo.type === room.ROOM_TYPE.GROUP_CHAT ? (
                       <div>
                         <Button type="primary" block onClick={this.showModal} className="invitation-btn">
                           {t('invitation.title')}
