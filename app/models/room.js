@@ -38,7 +38,7 @@ const Members = new Schema(
     role: { type: Number, default: config.MEMBER_ROLE.MEMBER }, //0: admin - 1: member - 2: read-only
     last_message_id: { type: Schema.ObjectId, ref: 'Messages', default: null },
     pinned: { type: Boolean, default: false },
-    room_group: { type: Schema.ObjectId, ref: 'Room_group' },
+    room_group: { type: Schema.ObjectId, ref: 'Group', default: [] },
     deletedAt: { type: Date, default: null },
   },
   {
@@ -134,10 +134,19 @@ RoomSchema.statics = {
     let list_filter_type_chat = [],
       default_quantity_unread = config.LIMIT_MESSAGE.COUNT_UNREAD,
       filter_unread = { $match: { quantity_unread: { $gt: 0 } } },
-      filter_pinned = { $match: { 'last_msg_id_reserve.pinned': true } },
+      filter_alone_room_pinned = {
+        $match: {
+          $or: [{ 'members.room_group': { $exists: true } }, { 'last_msg_id_reserve.pinned': true }],
+        },
+      },
       filter_group = { 'members.user': mongoose.Types.ObjectId(userId), type: config.ROOM_TYPE.GROUP_CHAT },
       filter_direct = { 'members.user': { $ne: mongoose.Types.ObjectId(userId) }, type: config.ROOM_TYPE.DIRECT_CHAT },
-      filter_self = { 'members.user': mongoose.Types.ObjectId(userId), type: config.ROOM_TYPE.SELF_CHAT };
+      filter_self = { 'members.user': mongoose.Types.ObjectId(userId), type: config.ROOM_TYPE.SELF_CHAT },
+      arr_flag_filter_group = [
+        config.FILTER_TYPE.LIST_ROOM.PINNED,
+        config.FILTER_TYPE.LIST_ROOM.GROUP_ROOMS,
+        config.FILTER_TYPE.LIST_ROOM.ALL,
+      ];
 
     filter_type = parseInt(filter_type);
 
@@ -205,64 +214,146 @@ RoomSchema.statics = {
       },
     });
 
-    if (filter_type === config.FILTER_TYPE.LIST_ROOM.PINNED) {
-      query.push(filter_pinned);
+    if (filter_type === config.FILTER_TYPE.LIST_ROOM.GROUP_ROOMS) {
+      query.push({
+        $match: { 'members.room_group': { $exists: true } },
+      });
     }
 
-    query.push(
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'members.user',
-          foreignField: '_id',
-          as: 'members.user_info',
+    if (filter_type === config.FILTER_TYPE.LIST_ROOM.PINNED) {
+      query.push(filter_alone_room_pinned);
+    }
+
+    query.push({
+      $lookup: {
+        from: 'users',
+        localField: 'members.user',
+        foreignField: '_id',
+        as: 'members.user_info',
+      },
+    });
+
+    if (arr_flag_filter_group.indexOf(filter_type) > -1) {
+      query.push(
+        {
+          $lookup: {
+            from: 'groups',
+            let: { group_id: '$members.room_group' },
+            pipeline: [
+              { $match: { $expr: { $eq: ['$_id', '$$group_id'] } } },
+              { $project: { _id: 1, pinned: 1, name: 1, avatar_url: 1 } },
+            ],
+            as: 'room_group',
+          },
+        },
+        {
+          $addFields: {
+            room_group: { $arrayElemAt: ['$room_group', 0] },
+          },
+        },
+        {
+          $addFields: {
+            key_groupBy: { $ifNull: ['$room_group._id', '$_id'] },
+          },
+        }
+      );
+    }
+
+    let project_room = {
+      $project: {
+        name: {
+          $cond: {
+            if: { $in: ['$type', [config.ROOM_TYPE.GROUP_CHAT, config.ROOM_TYPE.SELF_CHAT]] },
+            then: '$name',
+            else: { $arrayElemAt: ['$members.user_info.name', 0] },
+          },
+        },
+        avatar: {
+          $cond: {
+            if: { $eq: ['$type', config.ROOM_TYPE.GROUP_CHAT] },
+            then: '$avatar',
+            else: { $arrayElemAt: ['$members.user_info.avatar', 0] },
+          },
+        },
+        type: 1,
+        last_created_msg: {
+          $max: [{ $max: '$messages.createdAt' }, '$createdAt'],
+        },
+        pinned: '$last_msg_id_reserve.pinned',
+        createdAt: 1,
+        quantity_unread: { $size: '$message_able' },
+        members: {
+          $cond: {
+            if: { $eq: ['$type', config.ROOM_TYPE.DIRECT_CHAT] },
+            then: { $arrayElemAt: ['$members.user_info._id', 0] },
+            else: '',
+          },
         },
       },
-      {
-        $project: {
-          name: {
-            $cond: {
-              if: { $in: ['$type', [config.ROOM_TYPE.GROUP_CHAT, config.ROOM_TYPE.SELF_CHAT]] },
-              then: '$name',
-              else: { $arrayElemAt: ['$members.user_info.name', 0] },
-            },
-          },
-          avatar: {
-            $cond: {
-              if: { $eq: ['$type', config.ROOM_TYPE.GROUP_CHAT] },
-              then: '$avatar',
-              else: { $arrayElemAt: ['$members.user_info.avatar', 0] },
-            },
-          },
-          type: 1,
-          last_created_msg: {
-            $max: [{ $max: '$messages.createdAt' }, '$createdAt'],
-          },
-          pinned: '$last_msg_id_reserve.pinned',
-          createdAt: 1,
-          quantity_unread: { $size: '$message_able' },
-          members: {
-            $cond : {
-              if: { $eq: ['$type', config.ROOM_TYPE.DIRECT_CHAT] },
-              then: { $arrayElemAt: ['$members.user_info._id', 0] },
-              else: '',
-            }
-          }
-        },
-      }
-    );
+    };
+
+    if (arr_flag_filter_group.indexOf(filter_type) > -1) {
+      project_room['$project'].key_groupBy = 1;
+      project_room['$project'].room_group = 1;
+      project_room['$project'].pin_group = '$room_group.pinned';
+    }
+
+    query.push(project_room);
 
     if (filter_type === config.FILTER_TYPE.LIST_ROOM.UNREAD) {
       query.push(filter_unread);
     }
 
-    query.push(
-      {
-        $sort: {
-          pinned: -1,
-          last_created_msg: -1,
-        },
+    query.push({
+      $sort: {
+        pinned: -1,
+        last_created_msg: -1,
       },
+    });
+
+    if (arr_flag_filter_group.indexOf(filter_type) > -1) {
+      query.push(
+        {
+          $group: {
+            _id: '$key_groupBy',
+            group_info: { $first: '$room_group' },
+            pinned: { $first: '$pinned' },
+            last_created_msg: { $max: '$last_created_msg' },
+            list_room: { $push: '$$ROOT' },
+          },
+        },
+        {
+          $addFields: {
+            pinned: { $ifNull: ['$group_info.pinned', '$pinned'] },
+          },
+        },
+        {
+          $sort: {
+            pinned: -1,
+            last_created_msg: -1,
+          },
+        },
+        {
+          $project: {
+            group_id: '$group_info._id',
+            name: '$group_info.name',
+            avatar: '$group_info.avatar',
+            pinned: 1,
+            last_created_msg: 1,
+            list_room: 1,
+          },
+        }
+      );
+    }
+
+    if (filter_type === config.FILTER_TYPE.LIST_ROOM.PINNED) {
+      query.push({
+        $match: {
+          $or: [{ pinned: true }, { 'list_room.pinned': true }],
+        },
+      });
+    }
+    query.push(
       { $skip: limit * page },
       {
         $limit: 20,
@@ -473,11 +564,11 @@ RoomSchema.statics = {
   getTasksOfRoom(roomId, userId, type) {
     let query = [{ $match: { _id: mongoose.Types.ObjectId(roomId), deletedAt: null } }, { $unwind: '$tasks' }];
 
-    if (type == config.TASK.TYPE.TASKS_ASSIGNED) {
+    if (type === config.TASK.TYPE.TASKS_ASSIGNED) {
       query.push({
         $match: { 'tasks.deletedAt': null, 'tasks.assigner': mongoose.Types.ObjectId(userId) },
       });
-    } else if (type == config.TASK.TYPE.MY_TASKS) {
+    } else if (type === config.TASK.TYPE.MY_TASKS) {
       query.push(
         {
           $addFields: {
@@ -931,18 +1022,6 @@ RoomSchema.statics = {
     return room.length ? room[0].last_message_id : null;
   },
 
-  getPinnedRoom: function(roomId, userId) {
-    return this.findOne(
-      {
-        _id: roomId,
-        deletedAt: null,
-      },
-      {
-        members: { $elemMatch: { user: { $eq: userId }, deletedAt: null } },
-      }
-    ).exec();
-  },
-
   getLastMsgIdOfUser: async function(roomId, userId) {
     const room = await this.aggregate([
       { $match: { _id: mongoose.Types.ObjectId(roomId) } },
@@ -953,14 +1032,14 @@ RoomSchema.statics = {
     return room.length ? room[0].members.last_message_id : null;
   },
 
-  pinnedRoom: function(roomId, userId, pinned) {
+  updatePin: function(roomId, userId, pin) {
     return this.findOneAndUpdate(
       {
         _id: roomId,
         deletedAt: null,
         members: { $elemMatch: { user: userId, deletedAt: null } },
       },
-      { $set: { 'members.$.pinned': pinned } }
+      { $set: { 'members.$.pinned': pin } }
     ).exec();
   },
 
@@ -971,7 +1050,7 @@ RoomSchema.statics = {
     if (msgId == null) {
       msgId = await this.getLastMsgIdOfUser(roomId, userId);
 
-      if (msgId == null && getNextMsgFlag == false) {
+      if (msgId == null && getNextMsgFlag === false) {
         return [];
       }
     }
@@ -1052,7 +1131,7 @@ RoomSchema.statics = {
   changeRoleMember: function(roomId, members) {
     return this.findById(roomId).then(function(room) {
       for (let i in members) {
-        let index = room.members.findIndex(member => member.user == members[i].memberId);
+        let index = room.members.findIndex(member => member.user === members[i].memberId);
 
         if (index !== -1) {
           room.members[index].role = members[i].nextRole;
@@ -1190,7 +1269,7 @@ RoomSchema.statics = {
   },
 
   getDirectRoomId: async function(userId, friendId) {
-    let type = userId == friendId ? config.ROOM_TYPE.SELF_CHAT : config.ROOM_TYPE.DIRECT_CHAT;
+    let type = userId === friendId ? config.ROOM_TYPE.SELF_CHAT : config.ROOM_TYPE.DIRECT_CHAT;
 
     return this.find(
       {
@@ -1603,7 +1682,7 @@ RoomSchema.statics = {
       },
     ]).exec();
 
-    return task.length == 0 ? {} : task[0];
+    return task.length === 0 ? {} : task[0];
   },
 
   deleteTask(roomId, taskId) {
@@ -1709,7 +1788,7 @@ RoomSchema.statics = {
       ]).exec();
 
       if (reaction[0].reaction) {
-        if (reaction[0].reaction.reaction_tag == reactionTag) {
+        if (reaction[0].reaction.reaction_tag === reactionTag) {
           return await this.findOneAndUpdate(
             conditionFilter,
             {
@@ -2078,6 +2157,29 @@ RoomSchema.statics = {
     ]);
 
     return result.length ? result : [];
+  },
+
+  async updateGroupForMember(roomIds, memberId, groupId) {
+    let result = false;
+
+    await this.updateMany(
+      {
+        _id: roomIds,
+        deletedAt: null,
+      },
+      { $set: { 'members.$[i].room_group': groupId } },
+      { arrayFilters: [{ 'i.user': mongoose.Types.ObjectId(memberId), 'i.deletedAt': null }] }
+    )
+      .then(function(resp) {
+        if (resp.ok) {
+          result = true;
+        }
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+
+    return result;
   },
 };
 

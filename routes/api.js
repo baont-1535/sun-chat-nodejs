@@ -13,6 +13,7 @@ const nicknamesController = require('../app/controllers/nicknames');
 const callsController = require('../app/controllers/calls');
 const tasksController = require('../app/controllers/tasks');
 const nicknameController = require('../app/controllers/nicknames');
+const groupController = require('../app/controllers/group');
 const authorization = require('../config/middlewares/authorization.js');
 //validation
 const usersValidate = require('../app/validations/users.js');
@@ -237,6 +238,16 @@ router.post(
   '/rooms/:roomId/reject-tasks/:taskId',
   [auth.jwtMiddleware, authorization.room.hasAuthorization, authorization.tasks.isAssignee],
   tasksController.rejectTask
+);
+
+// Group
+
+router.post('/group/create', [auth.jwtMiddleware], groupController.create);
+
+router.post(
+  '/group/pin-group/:groupId',
+  [auth.jwtMiddleware, authorization.group.hasAuthorization],
+  groupController.togglePinGroup
 );
 
 // Reaction

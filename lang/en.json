@@ -197,6 +197,19 @@
       "failed": "Get room id failed"
     }
   },
+  "group": {
+    "name_required": "The field name is required",
+    "name_length": "Name must be {{min}} to {{max}} characters",
+    "group_not_exist": "This group is not exist !",
+    "create": {
+      "success": "Creating the group succeed !",
+      "fail": "Creating the group failed !"
+    },
+    "update": {
+      "success": "Updating the group succeed !",
+      "fail": "Updating the group failed !"
+    }
+  },
   "socket": {
     "room": {
       "open_room_failed": "open_room_failed"

@@ -34,17 +34,44 @@ function customMessageValidate(errors) {
 exports.index = async function(req, res) {
   let { _id } = req.decoded;
   const page = (req.query.page > 0 ? req.query.page : 1) - 1;
-  const filter_type = req.query.filter_type;
+  const { filter_type } = req.query;
   const limit = config.LIMIT_ITEM_SHOW.ROOM;
+
   const options = {
     userId: _id,
     filter_type: filter_type,
     limit: limit,
     page: page,
   };
-  let rooms = await Room.getListRoomByUserId(options);
 
-  return res.status(200).json(rooms);
+  try {
+    let result = await Room.getListRoomByUserId(options);
+    let chats = [],
+      arr_flag_filter_group = [
+        config.FILTER_TYPE.LIST_ROOM.PINNED,
+        config.FILTER_TYPE.LIST_ROOM.GROUP_ROOMS,
+        config.FILTER_TYPE.LIST_ROOM.ALL,
+      ];
+    if (arr_flag_filter_group.indexOf(parseInt(filter_type)) > -1) {
+      result.forEach(chat => {
+        if (chat.group_id) {
+          chats.push(chat);
+        } else {
+          chats.push(chat.list_room[0]);
+        }
+      });
+    } else {
+      chats = result;
+    }
+
+    return res.status(200).json(chats);
+  } catch (err) {
+    channel.error(err);
+
+    return res.status(500).json({
+      error: err.toString(),
+    });
+  }
 };
 
 exports.getRoomsBySubName = async function(req, res) {
@@ -89,7 +116,7 @@ exports.getMemberOfRoom = async function(req, res) {
     members.map(function(member) {
       let { _id: memberId } = member.user;
 
-      if (memberId == _id && member.members.role === config.MEMBER_ROLE.ADMIN) {
+      if (memberId === _id && member.members.role === config.MEMBER_ROLE.ADMIN) {
         isAdmin = true;
       }
 
@@ -179,7 +206,7 @@ exports.createRoom = async (req, res) => {
     .then(roomData => {
       if (roomData) {
         roomData.members.map(async member => {
-          io.to(member.user).emit('action_room');
+          io.to(member.user).emit('reset-list-chat');
         });
         io.to(_id).emit('create_room_success', roomData._id);
 
@@ -495,20 +522,19 @@ exports.acceptRequests = async (req, res) => {
 exports.togglePinnedRoom = async (req, res) => {
   let { roomId } = req.params;
   let { _id: userId } = req.decoded;
-  let pinnedRoom = await Room.getPinnedRoom(roomId, userId);
+  const { pinned } = req.body;
 
   try {
-    let pinned = !pinnedRoom.members[0].pinned;
-    await Room.pinnedRoom(roomId, userId, pinned);
+    await Room.updatePin(roomId, userId, !pinned);
 
     return res.status(200).json({
-      success: __('room.pinned.success', { pinned: pinned ? 'Pin' : 'Unpin' }),
+      message: __('room.pinned.success'),
     });
   } catch (err) {
     channel.error(err);
 
     return res.status(500).json({
-      error: __('room.pinned.failed', { pinned: pinned ? 'Pin' : 'Unpin' }),
+      error: __('room.pinned.failed'),
     });
   }
 };
@@ -793,7 +819,7 @@ exports.sendCallingRequest = async (req, res) => {
   }
 };
 
-exports.reactionMsg = async(req, res) => {
+exports.reactionMsg = async (req, res) => {
   const io = req.app.get('socketIO');
   const { roomId } = req.params;
   const { _id: userId } = req.decoded;
@@ -807,16 +833,16 @@ exports.reactionMsg = async(req, res) => {
     return res.status(200).json({
       message: __('reaction.success'),
     });
-  } catch(err) {
+  } catch (err) {
     channel.error(err);
 
     return res.status(500).json({
       error: __('reaction.failed'),
     });
   }
-}
+};
 
-exports.getReactionUserListOfMsg = async(req, res) => {
+exports.getReactionUserListOfMsg = async (req, res) => {
   const io = req.app.get('socketIO');
   const { roomId, msgId, reactionTag } = req.params;
   const { _id: userId } = req.decoded;
@@ -825,29 +851,29 @@ exports.getReactionUserListOfMsg = async(req, res) => {
     let listUser = await Room.getUserListByReactionTag({ roomId, msgId, reactionTag });
 
     return res.status(200).json({ list_user: listUser });
-  } catch(err) {
+  } catch (err) {
     channel.error(err);
 
     return res.status(500).json({
       error: __('error.common'),
     });
   }
-}
+};
 
-exports.getMessageInfo = async(req, res) => {
-  const { roomId, messageId} = req.params;
+exports.getMessageInfo = async (req, res) => {
+  const { roomId, messageId } = req.params;
 
   try {
     const message = await Room.getMessageInfo(roomId, messageId);
 
     return res.status(200).json({
-      message: message
-    })
-  } catch(err) {
+      message: message,
+    });
+  } catch (err) {
     channel.error(err);
 
     return res.status(500).json({
       error: __('error.common'),
     });
   }
-}
+};

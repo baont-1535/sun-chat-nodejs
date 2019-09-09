@@ -30,6 +30,8 @@ const roomValidate = {
   },
 };
 
+const groupValidate = roomValidate;
+
 const avatarValidate = {
   IMG_SIZE: 5, //MB
   IMG_TYPES: ['image/png', 'image/jpeg', 'image/gif'],
@@ -38,5 +40,6 @@ const avatarValidate = {
 module.exports = {
   authValidate,
   roomValidate,
+  groupValidate,
   avatarValidate,
 };

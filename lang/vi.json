@@ -196,6 +196,19 @@
       "failed": "Lấy ID room cuộc trò chuyện thất bại"
     }
   },
+  "group": {
+    "name_required": "Name phải điền đầy đủ",
+    "name_length": "Chỉ có thể nhập từ {{min}} đến {{max}} ký tự!",
+    "group_not_exist": "Nhóm không tồn tại !",
+    "create": {
+      "success": "",
+      "fail": ""
+    },
+    "update": {
+      "success": "",
+      "fail": ""
+    }
+  },
   "socket": {
     "room": {
       "open_room_failed": "Không thể mở phòng"

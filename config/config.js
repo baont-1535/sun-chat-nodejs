@@ -36,6 +36,7 @@ module.exports = {
       GROUP: 3,
       DIRECT: 4,
       SELF: 5,
+      GROUP_ROOMS: 6,
     },
   },
   LIMIT_MESSAGE: {

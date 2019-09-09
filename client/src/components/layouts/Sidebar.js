@@ -3,7 +3,7 @@ import { Layout, Icon, Menu, Avatar, message, Typography, Dropdown, List, Button
 import InfiniteScroll from 'react-infinite-scroller';
 import { checkExpiredToken, saveSizeComponentsChat } from './../../helpers/common';
 import { getListRoomsByUser, getQuantityRoomsByUserId, togglePinnedRoom } from './../../api/room';
-// import { togglePinnedGroup } from './../../api/group';
+import { togglePinnedGroup } from './../../api/group';
 import { Link } from 'react-router-dom';
 import config from './../../config/listRoom';
 import { room } from './../../config/room';
@@ -33,43 +33,13 @@ class Sidebar extends React.Component {
 
   fetchData = (page, filter_type, resetListChat = false) => {
     getListRoomsByUser(page, filter_type).then(res => {
-      let chats = this.formatListChat(res.data);
-
       this.setState({
-        list_chat: resetListChat ? res.data : [...this.state.list_chat, ...chats],
+        list_chat: resetListChat ? res.data : [...this.state.list_chat, ...res.data],
         page,
         loading: false,
       });
     });
   };
-
-  formatListChat = (data) => {
-    let chats = [];
-
-    data.map(chat => {
-      if (chat.room_group && chat.room_group._id) {
-        let group = chat.room_group;
-        group.list_room = [];
-
-        data.map(item => {
-          if (item.room_group && item.room_group._id === group._id) {
-            delete item.room_group;
-            group.list_room.push(item);
-            item.reject = true;
-          }
-        });
-
-        chats.push(group);
-      } else {
-        chats.push(chat);
-      }
-    });
-    chats = chats.filter(chat => {
-      return chat.reject === undefined;
-    });
-
-    return chats;
-  }
 
   getListRoom() {
     const { socket } = this.context;
@@ -113,7 +83,7 @@ class Sidebar extends React.Component {
 
       socket.on('update_list_room', list_chat => {
         this.setState({
-          list_chat: this.formatListChat(list_chat),
+          list_chat: list_chat,
         });
       });
 
@@ -179,18 +149,25 @@ class Sidebar extends React.Component {
         if (chat) {
           chat.last_created_msg = res.room.last_created_msg;
 
-          if (res.sender !== this.props.userContext.info._id) {
-            chat.quantity_unread = res.room.quantity_unread;
+          if (chat.list_room) {
+            let room = chat.list_room.filter(item => {
+              return item._id === res.room._id;
+            });
+            this.updateStateRoom(room[0], res);
+          } else if (res.sender !== this.props.userContext.info._id) {
+              chat.quantity_unread = res.room.quantity_unread;
           }
 
           this.setState({ list_chat: this.state.list_chat.sort(this.compareRoom) });
+
         } else {
           this.addToListRooms(res.room, this.state.filter_type);
         }
       });
 
       socket.on('update_quantity_unread', res => {
-        let chat = this.getChatById(this.state.list_chat, res.room_id);
+        const getRoom = true;
+        let chat = this.getChatById(this.state.list_chat, res.room_id, getRoom);
 
         if (chat) {
           chat.quantity_unread = res.quantity_unread;
@@ -250,29 +227,38 @@ class Sidebar extends React.Component {
     let id = e.target.value;
 
     if (e.target.classList.contains('group')) {
-      // togglePinnedGroup(id, e.target.classList.contains('pinned')).then((res) => {
-      //   message.success(res.data.message);
-      //   this.getListRoom();
-      // });
+      togglePinnedGroup(id, e.target.classList.contains('pinned')).then(res => {
+        message.success(res.data.message);
+        this.getListRoom();
+      });
     } else {
-      togglePinnedRoom(id).then(() => {
+      togglePinnedRoom(id, e.target.classList.contains('pinned')).then(res => {
+        message.success(res.data.message);
         this.getListRoom();
       });
     }
   };
 
-  getChatById = (list_chat, roomId) => {
-    for (let i = list_chat.length - 1; i >= 0; i--) {
+  updateStateRoom(room, data) {
+    room.last_created_msg = data.room.last_created_msg;
+
+    if (data.sender !== this.props.userContext.info._id) {
+      room.quantity_unread = data.room.quantity_unread;
+    }
+  }
+
+  getChatById = (list_chat, roomId, getRoom = false) => {
+    for (let i = 0; i < list_chat.length; i ++) {
       if (list_chat[i]._id === roomId) {
         return list_chat[i];
       }
 
-      if (list_chat.list_room) {
-        let room = list_chat.list_room.filter(item => {
+      if (list_chat[i].list_room) {
+        let room = list_chat[i].list_room.filter(item => {
           return item._id === roomId;
         });
 
-        if (room) return room;
+        if (room.length) return getRoom ? room : list_chat[i];
       }
     }
 
@@ -290,19 +276,16 @@ class Sidebar extends React.Component {
       }
     }
 
-    const {hasMore, quantity_chats} = this.state;
+    const { hasMore, quantity_chats } = this.state;
 
     if (hasMore !== true || indexUnpinned !== -1 || newRoom.pinned === true) {
       if (newRoom.pinned === true) {
         if (
           filter_type === config.FILTER_TYPE.LIST_ROOM.PINNED.VALUE ||
           filter_type === config.FILTER_TYPE.LIST_ROOM.ALL.VALUE ||
-          (filter_type === config.FILTER_TYPE.LIST_ROOM.GROUP.VALUE &&
-            newRoom.type === room.ROOM_TYPE.GROUP_CHAT) ||
-          (filter_type === config.FILTER_TYPE.LIST_ROOM.DIRECT.VALUE &&
-            newRoom.type === room.ROOM_TYPE.DIRECT_CHAT) ||
-          (filter_type === config.FILTER_TYPE.LIST_ROOM.UNREAD.VALUE &&
-            newRoom.quantity_unread > 0)
+          (filter_type === config.FILTER_TYPE.LIST_ROOM.GROUP.VALUE && newRoom.type === room.ROOM_TYPE.GROUP_CHAT) ||
+          (filter_type === config.FILTER_TYPE.LIST_ROOM.DIRECT.VALUE && newRoom.type === room.ROOM_TYPE.DIRECT_CHAT) ||
+          (filter_type === config.FILTER_TYPE.LIST_ROOM.UNREAD.VALUE && newRoom.quantity_unread > 0)
         ) {
           list_chat.splice(0, 0, newRoom);
 
@@ -314,12 +297,16 @@ class Sidebar extends React.Component {
         } else {
           list_chat.splice(indexUnpinned, 0, newRoom);
 
-          if (quantity_chats % config.LIMIT_ITEM_SHOW.ROOM === 0) { this.setState({hasMore: true}); }
-          if (quantity_chats >= config.LIMIT_ITEM_SHOW.ROOM) { list_chat.splice(list_chat.length - 1, 1); }
+          if (quantity_chats % config.LIMIT_ITEM_SHOW.ROOM === 0) {
+            this.setState({ hasMore: true });
+          }
+          if (quantity_chats >= config.LIMIT_ITEM_SHOW.ROOM) {
+            list_chat.splice(list_chat.length - 1, 1);
+          }
         }
       }
 
-      this.setState({list_chat});
+      this.setState({ list_chat });
     }
   };
 
@@ -353,13 +340,18 @@ class Sidebar extends React.Component {
     saveSizeComponentsChat();
   };
 
-  generateChatRoom = (index, item, tick = '', first_round = false) => {
+  generateChatRoom = (index, item, tick, first_round = false) => {
     const link = item.list_room ? item.list_room[0]._id : item._id;
+    const _id = tick === 'group' ? item.group_id : item._id;
     return (
       <List.Item
         key={index}
-        className={item._id === this.state.selected_room ? `item-active ${first_round? '' : 'sub-room'}` : `${first_round? '' : 'sub-room'}`}
-        data-room-id={item._id}
+        className={
+          _id === this.state.selected_room
+            ? `item-active ${first_round ? '' : 'sub-room'}`
+            : `${first_round ? '' : 'sub-room'}`
+        }
+        data-room-id={_id}
       >
         <Link to={`/rooms/${link}`}>
           <div className="avatar-name">
@@ -367,24 +359,24 @@ class Sidebar extends React.Component {
               className={
                 item.type === room.ROOM_TYPE.DIRECT_CHAT
                   ? `_avatar _avatar_Uid_${item.members}`
-                  : `_avatar _avatar_Rid_${item._id}`
+                  : `_avatar _avatar_Rid_${_id}`
               }
               size={avatarConfig.AVATAR.SIZE.MEDIUM}
               src={
-                item.type === room.ROOM_TYPE.GROUP_CHAT
-                  ? getRoomAvatarUrl(item.avatar)
-                  : getUserAvatarUrl(item.avatar)
+                item.type === room.ROOM_TYPE.GROUP_CHAT ? getRoomAvatarUrl(item.avatar) : getUserAvatarUrl(item.avatar)
               }
             />
             &nbsp;&nbsp;
             <span className="nav-text">{item.name}</span>
           </div>
           <div className="state-room">
-            {item.quantity_unread > 0 && !item.list_room && <Typography.Text mark>{item.quantity_unread}</Typography.Text>}
+            {item.quantity_unread > 0 && !item.list_room && (
+              <Typography.Text mark>{item.quantity_unread}</Typography.Text>
+            )}
             <Button
-              className={item.pinned ? `pin pinned ${tick ? tick : ''}` : `pin ${tick ? tick : ''}`}
+              className={item.pinned ? `pin pinned ${tick}` : `pin ${tick}`}
               onClick={this.handlePinned}
-              value={item._id}
+              value={_id}
             >
               <Icon type="pushpin" />
             </Button>
@@ -392,7 +384,7 @@ class Sidebar extends React.Component {
         </Link>
       </List.Item>
     );
-  }
+  };
 
   render() {
     const { list_chat } = this.state;
@@ -430,11 +422,8 @@ class Sidebar extends React.Component {
             {this.generateChatRoom(index, item, tick, first_round)}
             {item.list_room &&
               item.list_room.map((subRoom, index) => {
-                return (
-                  this.generateChatRoom(index, subRoom)
-                );
-              })
-            }
+                return this.generateChatRoom(index, subRoom, 'icon_pin_room');
+              })}
           </div>
         );
       });
@@ -458,7 +447,8 @@ class Sidebar extends React.Component {
               <div id="div-filter">
                 <Dropdown overlay={cond_filter}>
                   <a className="ant-dropdown-link">
-                    <Icon type="filter" />&nbsp;
+                    <Icon type="filter" />
+                    &nbsp;
                     {selected_content}
                   </a>
                 </Dropdown>

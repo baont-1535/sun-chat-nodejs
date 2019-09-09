@@ -8,7 +8,8 @@
     "all": "Tất cả box chat",
     "un_read": "Box chưa đọc",
     "pinned": "Box đã ghim",
-    "group_chat": "Nhóm chat",
+    "group_chat": "Chat nhóm",
+    "group_room": "Nhóm phòng chat",
     "direct_chat": "Liên hệ riêng",
     "my_chat": "Box cá nhân"
   }

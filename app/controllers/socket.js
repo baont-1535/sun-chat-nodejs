@@ -80,8 +80,26 @@ module.exports = function(io) {
         page: params.page,
       };
 
-      let rooms = await Room.getListRoomByUserId(options);
-      io.to(socket.userId).emit('update_list_room', rooms);
+      let result = await Room.getListRoomByUserId(options);
+      let chats = [],
+        arr_flag_filter_group = [
+          config.FILTER_TYPE.LIST_ROOM.PINNED,
+          config.FILTER_TYPE.LIST_ROOM.GROUP_ROOMS,
+          config.FILTER_TYPE.LIST_ROOM.ALL,
+        ];
+      if (arr_flag_filter_group.indexOf(parseInt(options.filter_type)) > -1) {
+        result.forEach(chat => {
+          if (chat.group_id) {
+            chats.push(chat);
+          } else {
+            chats.push(chat.list_room[0]);
+          }
+        });
+      } else {
+        chats = result;
+      }
+
+      io.to(socket.userId).emit('update_list_room', chats);
     });
 
     socket.on('regist-live-chat', async function({ roomId, liveId, master }) {

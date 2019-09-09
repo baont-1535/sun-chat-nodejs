@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import { withNamespaces } from 'react-i18next';
 import { withRouter } from 'react-router';
 import 'antd/dist/antd.css';
-// import { createGroup, editGroup } from '../../../api/group';
+import { createGroup, editGroup } from '../../../api/group';
 import { room } from '../../../config/room';
 import {Row, Col, Card, Form, Input, Icon, Modal, message, Checkbox, Upload, List, Avatar} from 'antd';
 import { SocketContext } from '../../../context/SocketContext';
 import {getRoomAvatarUrl, getUserAvatarUrl} from '../../../helpers/common';
 import {getListRoomsByUser, getQuantityRoomsByUserId} from "../../../api/room";
 import InfiniteScroll from "react-infinite-scroller";
+import config from "../../../config/listRoom";
 
 const FormItem = Form.Item;
 const CheckboxGroup = Checkbox.Group;
@@ -51,9 +52,9 @@ class FormCreateGroup extends Component {
   };
 
   fetchData() {
-    const filterType = 0, aloneRoom = 1;
+    const filterType = config.FILTER_TYPE.LIST_ROOM.ALL.VALUE;
 
-    getListRoomsByUser(this.state.page, filterType, aloneRoom).then(res => {
+    getListRoomsByUser(this.state.page, filterType).then(res => {
       this.setState({
         listChat: [...this.state.listChat, ...res.data],
       });
@@ -153,28 +154,28 @@ class FormCreateGroup extends Component {
   handleCreateGroup = group => {
     const { form, handleModalCreateGroup } = this.props;
 
-    // createGroup(group)
-    //   .then(response => {
-    //     form.resetFields();
-    //
-    //     this.setState({
-    //       fileList: [],
-    //     });
-    //
-    //     message.success(response.data.message);
-    //     handleModalCreateGroup();
-    //   })
-    //   .catch(this.handleError);
+    createGroup(group)
+      .then(response => {
+        form.resetFields();
+
+        this.setState({
+          fileList: [],
+        });
+
+        message.success(response.data.message);
+        handleModalCreateGroup();
+      })
+      .catch(this.handleError);
   };
 
   handleEditGroup = (groupId, group) => {
     const { handleModalCreateGroup } = this.props;
-    // editGroup(groupId, group)
-    //   .then(response => {
-    //     message.success(response.data.message);
-    //     handleModalCreateGroup();
-    //   })
-    //   .catch(this.handleError);
+    editGroup(groupId, group)
+      .then(response => {
+        message.success(response.data.message);
+        handleModalCreateGroup();
+      })
+      .catch(this.handleError);
   };
 
   handleSubmit = () => {

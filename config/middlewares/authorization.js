@@ -4,6 +4,7 @@ const { wrap: async } = require('co');
 const mongoose = require('mongoose');
 const Room = mongoose.model('Room');
 const User = mongoose.model('User');
+const Group = mongoose.model('Group');
 const jwt = require('jsonwebtoken');
 const logger = require('./../../app/logger/winston.js');
 const channel = logger.init('error');
@@ -14,7 +15,7 @@ const config = require('../config');
 
 exports.requiresLogin = function(req, res, next) {
   if (req.isAuthenticated()) return next();
-  if (req.method == 'GET') req.session.returnTo = req.originalUrl;
+  if (req.method === 'GET') req.session.returnTo = req.originalUrl;
   res.redirect('/login');
 };
 
@@ -39,7 +40,7 @@ exports.requiresAPILogin = function(req, res, next) {
 
 exports.user = {
   hasAuthorization: function(req, res, next) {
-    if (req.profile.id != req.user.id) {
+    if (req.profile.id !== req.user.id) {
       req.flash('info', 'You are not authorized');
       return res.redirect('/users/' + req.profile.id);
     }
@@ -84,7 +85,7 @@ exports.user = {
 
 exports.article = {
   hasAuthorization: function(req, res, next) {
-    if (req.article.user.id != req.user.id) {
+    if (req.article.user.id !== req.user.id) {
       req.flash('info', 'You are not authorized');
       return res.redirect('/articles/' + req.article.id);
     }
@@ -145,7 +146,7 @@ exports.room = {
     let { roomId } = req.body;
     let { _id } = req.decoded;
 
-    if (roomId == undefined) {
+    if (roomId === undefined) {
       roomId = req.params.roomId;
     }
 
@@ -226,7 +227,7 @@ exports.room = {
     const { memberId } = req.body;
     let { _id } = req.decoded;
 
-    if (memberId == _id) {
+    if (memberId === _id) {
       return res.status(403).json({
         error: __('room.not_me'),
       });
@@ -389,7 +390,7 @@ exports.tasks = {
         },
       ]);
 
-      if (task.length == 0) {
+      if (task.length === 0) {
         return res.status(403).json({
           error: __('task.finish.authorization'),
         });
@@ -426,7 +427,7 @@ exports.tasks = {
         },
       ]);
 
-      if (task.length == 0) {
+      if (task.length === 0) {
         return res.status(403).json({
           error: __('task.edit.authorization'),
         });
@@ -469,7 +470,7 @@ exports.tasks = {
         },
       ]);
 
-      if (task.length == 0) {
+      if (task.length === 0) {
         return res.status(403).json({
           error: __('task.edit.authorization'),
         });
@@ -506,6 +507,33 @@ exports.calls = {
 
       return res.status(500).json({
         message: __('error.common'),
+      });
+    }
+  },
+};
+
+exports.group = {
+  hasAuthorization: async function(req, res, next) {
+    const { groupId } = req.params;
+
+    try {
+      const group = await Group.findOne({
+        _id: groupId,
+        deletedAt: null,
+      });
+
+      if (group === null) {
+        return res.status(403).json({
+          err: __('group.group_not_exist'),
+        });
+      }
+
+      next();
+    } catch (err) {
+      channel.error(err);
+
+      return res.status(500).json({
+        err: __('error.common'),
       });
     }
   },

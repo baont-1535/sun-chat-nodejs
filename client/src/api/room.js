@@ -68,8 +68,8 @@ export function rejectRequests(roomId, requestIds) {
   return new Http().authenticated().post(`/rooms/${roomId}/reject-requests`, requestIds);
 }
 
-export function togglePinnedRoom(roomId) {
-  return new Http().authenticated().post(`/rooms/${roomId}/pinned-room`);
+export function togglePinnedRoom(roomId, pinned) {
+  return new Http().authenticated().post(`/rooms/${roomId}/pinned-room`, { pinned: pinned });
 }
 
 export function changeRoleMember(data) {

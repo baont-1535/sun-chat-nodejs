@@ -25,6 +25,10 @@ const config = {
         VALUE: 5,
         TITLE: 'filter.my_chat',
       },
+      GROUP_ROOMS: {
+        VALUE: 6,
+        TITLE: 'filter.group_room',
+      },
     },
   },
   COND_SEARCH_TEXT: {
