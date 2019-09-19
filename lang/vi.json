@@ -201,12 +201,16 @@
     "name_length": "Chỉ có thể nhập từ {{min}} đến {{max}} ký tự!",
     "group_not_exist": "Nhóm không tồn tại !",
     "create": {
-      "success": "",
-      "fail": ""
+      "success": "Tạo thành công",
+      "fail": "Tạo thất bại"
     },
     "update": {
-      "success": "",
-      "fail": ""
+      "success": "Cập nhật thành công",
+      "fail": "Cập nhật thất bại"
+    },
+    "delete": {
+      "success": "Xoá thành công",
+      "fail": "Xoá thất bại"
     }
   },
   "socket": {

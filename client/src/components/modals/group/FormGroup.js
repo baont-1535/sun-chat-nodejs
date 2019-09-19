@@ -4,22 +4,20 @@ import { withRouter } from 'react-router';
 import 'antd/dist/antd.css';
 import { createGroup, editGroup } from '../../../api/group';
 import { room } from '../../../config/room';
-import {Row, Col, Card, Form, Input, Icon, Modal, message, Checkbox, Upload, List, Avatar} from 'antd';
+import { Row, Col, Card, Form, Input, Icon, Modal, message, Checkbox, Upload, List, Avatar } from 'antd';
 import { SocketContext } from '../../../context/SocketContext';
-import {getRoomAvatarUrl, getUserAvatarUrl} from '../../../helpers/common';
-import {getListRoomsByUser, getQuantityRoomsByUserId} from "../../../api/room";
-import InfiniteScroll from "react-infinite-scroller";
-import config from "../../../config/listRoom";
+import { getRoomAvatarUrl, getUserAvatarUrl } from '../../../helpers/common';
+import InfiniteScroll from 'react-infinite-scroller';
 
 const FormItem = Form.Item;
 const CheckboxGroup = Checkbox.Group;
 const { TextArea } = Input;
 
-class FormCreateGroup extends Component {
+class FormGroup extends Component {
   static contextType = SocketContext;
   static defaultProps = {
-    handleModalCreateGroup: () => {},
-    roomInfo: {
+    handleModalGroup: () => {},
+    groupInfo: {
       name: '',
       desc: '',
     },
@@ -30,11 +28,8 @@ class FormCreateGroup extends Component {
     changeAvatar: false,
     fileList: [],
     errors: {},
-    page: 1,
     listChat: [],
     roomIds: [],
-    hasMore: true,
-    quantity_chats: 0
   };
 
   rules = {
@@ -51,40 +46,33 @@ class FormCreateGroup extends Component {
     ],
   };
 
-  fetchData() {
-    const filterType = config.FILTER_TYPE.LIST_ROOM.ALL.VALUE;
-
-    getListRoomsByUser(this.state.page, filterType).then(res => {
-      this.setState({
-        listChat: [...this.state.listChat, ...res.data],
-      });
-    });
-  }
-
-  componentDidMount() {
-    getQuantityRoomsByUserId().then(res => {
-      this.setState({
-        quantity_chats: res.data.result,
-      });
-    });
-  }
-
-  componentDidUpdate() {
-    if (this.props.modalVisible && !this.state.listChat.length) {
-      this.fetchData();
-    }
-  }
   componentWillReceiveProps(nextProps) {
-    const { roomInfo } = nextProps;
-
-    if (nextProps.roomInfo._id !== this.props.roomInfo._id) {
+    const { groupInfo, rooms } = nextProps;
+    if (groupInfo._id) {
+      let roomIds = [];
+      rooms.every(room => {
+        if (room.joined) {
+          roomIds.push(room._id);
+          return true;
+        } else {
+          return false;
+        }
+      });
       this.setState({
-        fileList: roomInfo.avatar ? [
-          {
-            uid: '-1',
-            url: getRoomAvatarUrl(roomInfo.avatar),
-          },
-        ] : [],
+        roomIds: roomIds,
+      });
+    }
+
+    if (nextProps.groupInfo._id !== this.props.groupInfo._id) {
+      this.setState({
+        fileList: groupInfo.avatar_url
+          ? [
+              {
+                uid: '-1',
+                url: getRoomAvatarUrl(groupInfo.avatar_url),
+              },
+            ]
+          : [],
       });
     }
   }
@@ -127,96 +115,82 @@ class FormCreateGroup extends Component {
   };
 
   handleCancelSubmit = () => {
-    let { roomInfo } = this.props;
+    let { groupInfo } = this.props;
     this.setState({
       changeAvatar: false,
       errors: {},
-      fileList: roomInfo.avatar ? [
-        {
-          uid: '-1',
-          url: getRoomAvatarUrl(roomInfo.avatar),
-        },
-      ] : [],
+      fileList: groupInfo.avatar_url
+        ? [
+            {
+              uid: '-1',
+              url: getRoomAvatarUrl(groupInfo.avatar_url),
+            },
+          ]
+        : [],
     });
-    this.props.handleModalCreateGroup();
+    this.props.handleModalGroup();
   };
 
-  handleError = err => {
-    if (err.response.data.error) {
-      message.error(err.response.data.error);
-    } else {
+  handleCreateGroup = param => {
+    const { form, handleModalGroup } = this.props;
+
+    createGroup(param).then(response => {
+      const { notice, success } = response.data;
+
+      if (success) {
+        message.success(notice);
+      } else {
+        message.error(notice);
+      }
+
+      handleModalGroup();
+      form.resetFields();
       this.setState({
-        errors: err.response.data,
+        fileList: [],
       });
-    }
+    });
   };
 
-  handleCreateGroup = group => {
-    const { form, handleModalCreateGroup } = this.props;
-
-    createGroup(group)
+  handleEditGroup = (groupId, param) => {
+    const { handleModalGroup } = this.props;
+    editGroup(groupId, param)
       .then(response => {
-        form.resetFields();
+        const { notice, success } = response.data;
 
-        this.setState({
-          fileList: [],
-        });
-
-        message.success(response.data.message);
-        handleModalCreateGroup();
-      })
-      .catch(this.handleError);
-  };
-
-  handleEditGroup = (groupId, group) => {
-    const { handleModalCreateGroup } = this.props;
-    editGroup(groupId, group)
-      .then(response => {
-        message.success(response.data.message);
-        handleModalCreateGroup();
+        if (success) {
+          message.success(notice);
+        } else {
+          message.error(notice);
+        }
+        handleModalGroup();
       })
       .catch(this.handleError);
   };
 
   handleSubmit = () => {
-    const { form, roomInfo } = this.props;
+    const { form, groupInfo } = this.props;
     const { fileList, changeAvatar, roomIds } = this.state;
 
     form.validateFields((err, fieldsValue) => {
       if (err) return;
-
+      fieldsValue.name = fieldsValue.name.trim();
+      fieldsValue.desc = fieldsValue.desc.trim();
       let param = fieldsValue;
 
       if (this.state.fileList.length > 0 && changeAvatar) {
-        param = { ...fieldsValue, ...{ avatar: fileList[0].thumbUrl } };
+        param = { ...fieldsValue, ...{ avatar_url: fileList[0].thumbUrl } };
       }
 
-      if (roomInfo._id === undefined) {
-        param = { ...param, ...{ roomIds } };
+      param = { ...param, ...{ roomIds } };
+
+      if (groupInfo._id === undefined) {
         this.handleCreateGroup(param);
       } else {
         param.changeAvatar = this.state.changeAvatar;
 
-        this.handleEditGroup(roomInfo._id, param);
+        this.handleEditGroup(groupInfo._id, param);
       }
     });
-  };
-
-  handleInfiniteOnLoad = () => {
-    const { quantity_chats, page, listChat} = this.state;
-
-    this.setState({
-      page: page + 1,
-    });
-
-    if (listChat.length >= quantity_chats) {
-      message.warning(this.props.t('notice.action.end_of_list'));
-      this.setState({
-        hasMore: false,
-      });
-      return;
-    }
-    this.fetchData();
   };
 
   handleCheckBox = roomIds => {
@@ -226,8 +200,8 @@ class FormCreateGroup extends Component {
   };
 
   render() {
-    const { t, form, modalVisible, roomInfo } = this.props;
-    const { previewVisible, previewImage, fileList, errors, listChat, roomIds } = this.state;
+    const { t, form, modalVisible, groupInfo, rooms } = this.props;
+    const { previewVisible, previewImage, fileList, errors, roomIds } = this.state;
     const uploadButton = (
       <div>
         <Icon type="plus" />
@@ -236,36 +210,31 @@ class FormCreateGroup extends Component {
     );
 
     const renderHtml =
-      ( listChat.length > 0 &&
-      listChat.map((item, index) => {
+      rooms &&
+      rooms.length > 0 &&
+      rooms.map((chat, index) => {
         return (
-          <List.Item
-            key={index}
-            data-room-id={item._id}
-          >
+          <List.Item key={index} data-room-id={chat._id}>
             <div className="avatar-name">
               <Avatar
                 src={
-                  item.type === room.ROOM_TYPE.GROUP_CHAT
-                    ? getRoomAvatarUrl(item.avatar)
-                    : getUserAvatarUrl(item.avatar)
+                  chat.information.type === room.ROOM_TYPE.GROUP_CHAT
+                    ? getRoomAvatarUrl(chat.information.avatar)
+                    : getUserAvatarUrl(chat.information.avatar)
                 }
               />
               &nbsp;&nbsp;
-              <span className="nav-text">{item.name}</span>
+              <span className="nav-text">{chat.information.name}</span>
             </div>
-            <Checkbox
-              className="item-checkbox"
-              value={item._id}
-              key={item._id}
-            />
+            <Checkbox className="item-checkbox" value={chat._id} key={chat._id} />
           </List.Item>
         );
-      }));
+      });
+
     return (
       <Modal
         destroyOnClose
-        title={roomInfo._id === undefined ? t('title.create_group') : t('title.edit_group')}
+        title={groupInfo._id === undefined ? t('title.create_group') : t('title.edit_group')}
         visible={modalVisible}
         onOk={this.handleSubmit}
         onCancel={this.handleCancelSubmit}
@@ -306,36 +275,28 @@ class FormCreateGroup extends Component {
                 }
               >
                 {form.getFieldDecorator('name', {
-                  initialValue: roomInfo.name,
+                  initialValue: groupInfo.name,
                   rules: this.rules.name,
                 })(<Input placeholder={t('title.group_name')} />)}
               </FormItem>
               <div style={{ margin: '24px 0' }} />
               <FormItem key="desc">
                 {form.getFieldDecorator('desc', {
-                  initialValue: roomInfo.desc,
+                  initialValue: groupInfo.desc,
                 })(<TextArea placeholder={t('title.group_des')} autosize={{ minRows: 2, maxRows: 6 }} />)}
               </FormItem>
             </Col>
-            {roomInfo._id === undefined && (
-              <Col span={24}>
-                <Card title={t('title.add_group')} bordered={false}>
-                  <div className="rooms-for-group">
-                    <InfiniteScroll
-                      initialLoad={false}
-                      pageStart={0}
-                      loadMore={this.handleInfiniteOnLoad}
-                      hasMore={this.state.hasMore}
-                      useWindow={false}
-                    >
-                      <CheckboxGroup onChange={this.handleCheckBox} value={roomIds}>
+            <Col span={24}>
+              <Card title={t('title.add_room_into_group')} bordered={false}>
+                <div className="rooms-for-group">
+                  <InfiniteScroll>
+                    <CheckboxGroup onChange={this.handleCheckBox} value={roomIds}>
                       {renderHtml}
-                      </CheckboxGroup>
-                    </InfiniteScroll>
-                  </div>
-                </Card>
-              </Col>
-            )}
+                    </CheckboxGroup>
+                  </InfiniteScroll>
+                </div>
+              </Card>
+            </Col>
           </Row>
         </Form>
       </Modal>
@@ -343,6 +304,6 @@ class FormCreateGroup extends Component {
   }
 }
 
-FormCreateGroup = Form.create()(FormCreateGroup);
+FormGroup = Form.create()(FormGroup);
 
-export default withNamespaces(['group'])(withRouter(FormCreateGroup));
+export default withNamespaces(['group'])(withRouter(FormGroup));

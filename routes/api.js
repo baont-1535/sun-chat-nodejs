@@ -243,6 +243,9 @@ router.post(
 // Group
 
 router.post('/group/create', [auth.jwtMiddleware], groupController.create);
+router.post('/group/:groupId', [auth.jwtMiddleware], groupController.getInfoForGroupForm);
+router.post('/group/delete/:groupId', [auth.jwtMiddleware, authorization.group.hasAuthorization], groupController.deleteGroup);
+router.post('/group/edit/:groupId', [auth.jwtMiddleware, authorization.group.hasAuthorization], groupController.editGroup);
 
 router.post(
   '/group/pin-group/:groupId',

@@ -39,7 +39,29 @@ body {
     .state-room {
       min-width: 30px;
       max-width: 50px;
-      float: left;
+      float: right;
+      padding-right: 10px;
+    }
+
+    .state-group {
+      min-width: 30px;
+      max-width: 50px;
+      float: right;
+
+      .edit_delete_group {
+        margin-top: 2px;
+        float: right;
+        font-size: 22px;
+        color: red;
+        cursor: default;
+        border-radius: 10px;
+        &:hover {
+          background-color: #00314d;
+        }
+        .anticon {
+          margin: 4px 0px 4px 0px;
+        }
+      }
     }
 
     .ant-typography {
@@ -162,9 +184,11 @@ section.ant-layout {
   &:hover {
     background-color: #364c5f;
   }
-  a {
+  > div {
     width: 100%;
-    margin-bottom: -5px;
+    a {
+      margin-bottom: -5px;
+    }
   }
   &.item-active {
     background-color: #0a3661;
@@ -181,6 +205,9 @@ section.ant-layout {
     &.pinned {
       background: none;
       color: #00ff2f;
+      &:hover {
+        color: #ffefa9;
+      }
     }
     &:focus,
     &:active {
@@ -216,7 +243,6 @@ section.ant-layout {
   height: calc(100vh - #{$header-height});
   .sub-room {
     margin-left: 40px !important;
-    border-bottom: 1px solid #75608b;
     list-style-position:inside;
     a {
       margin-left: -5px;
@@ -225,6 +251,9 @@ section.ant-layout {
       width: 35px;
       height: 35px;
     }
+  }
+  .li-group {
+    background-color: #190b22;
   }
 }
 

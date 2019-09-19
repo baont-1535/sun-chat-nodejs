@@ -1,319 +1,326 @@
 {
-  "mail": {
-    "confirm": "Email sent, please check your inbox to confirm",
-    "confirmed": "Your email is confirmed!",
-    "send": "Confirmation email resent, maybe check your spam?",
-    "resend": "Email has expired! Confirmation email resent again, maybe check your spam?",
-    "resend_active_mail": "Confirmation email has been resent, if you do not see it, maybe check your spam?",
-    "send_active_mail": "Confirmation email resent, maybe check your spam?",
-    "couldNotFind": "Could not find you!",
-    "alreadyConfirmed": "Your email was already confirmed",
-    "confirm_failed": "Confirm failed",
-    "expired_token": "Expired token",
-    "resend_active_email": {
-      "failed": " Resend  email active  failed",
-      "account_have_active": "Account have  active"
-    }
-  },
-  "register_successfully": "Register Successfully",
-  "register_failed": "Register Failed",
-  "name_required": "The field name is required",
-  "username_required": "The field username is required",
-  "password_required": "The field password is required",
-  "invalid_email": "Email must be from Sun Asterisk INC",
-  "password_dont_match": "Passwords don't match",
-  "email_or_username_already": "That email address or username is already in use.",
-  "name_length": "Name must be {{min}} to {{max}} characters",
-  "username_length": "Username must be {{min}} to {{max}} characters",
-  "email_length": "Email may not be greater than {{max}} characters",
-  "password_length": "Password must be {{min}} to {{max}} characters",
-  "name_already_exist": "Name already exist",
-  "email_already_exist": "Email already exist",
-  "changed_lang": "Change language to {{lang}}",
-  "token_invalid": "Token invalid",
-  "token_valid": "Token valid",
-  "token_expired": "Token have been expired",
-  "authentication_failed": "Authentication failed",
-  "login_successfully": "Login successfully",
-  "load_to_fail_user_info": "Can't load user information !",
-  "update_to_fail_user": "Update failed !",
-  "update_to_success_user": "Update Successfully !",
-  "request_not_processed": "Request is not accepted !",
-  "change_password": {
-    "user_not_found": "User not found",
-    "old_password_incorrect": "Wrong password. Try again.",
-    "compare_new_and_confirm_password_failed": "Those passwords didn't match. Try again",
-    "compare_current_and_new_password_failed": "You have used this password recently. Please choose another password.",
-    "update_successfully": "Password changed successfully",
-    "change_password_failed": "Password changed failed",
-    "current_password_required": "The field current password is required",
-    "current_password_length": "Current password must be {{min}} to {{max}} characters",
-    "new_password_required": "The field new password is required",
-    "new_password_length": "New password must be {{min}} to {{max}} characters",
-    "confirm_password_required": "The field password is required"
-  },
-  "reset_password": {
-    "success": "Reset password Successfully",
-    "fail": "Reset password Failed",
-    "send_email": "Please check your email to reset password",
-    "not_match_pw": "The confirm password is not same password",
-    "send_email_error": "Send email unsuccessfully"
-  },
-  "login": {
-    "success": "Login Successfully",
-    "fail": "Invalid email or password.",
-    "in_active": "Please active your account"
-  },
-  "contact": {
-    "reject": {
-      "success": "Reject contact successfully",
-      "fail": "Reject contact failed"
-    },
-    "accept": {
-      "success": "Accept contact successfully",
-      "failed": "Accept contact failed"
-    },
-    "list": {
-      "failed": "Get list contacts failed"
-    },
-    "total": {
-      "failed": "Get data failed"
-    },
-    "delete_contact": {
-      "success": "Delete contact successfully",
-      "failed": "Delete contact failed"
-    },
-    "send_request": {
-      "success": "Send contact request successfully",
-      "failed": "Send contact request failed",
-      "required_input_search": "Please enter name or email address to search"
-    },
-    "list-request-sent-contact": {
-      "success": "Get list sent contact successfully",
-      "failed": "Get list sent contact failed"
-    },
-    "delete-request-sent-contact": {
-      "success": "Delete request sent contact successfully",
-      "failed": "Delete request sent contact failed"
-    }
-  },
-  "error": {
-    "403": "Forbidden error",
-    "404": "Not found",
-    "common": "Something went wrong",
-    "active_email_before_reset": "You must active email before use this feature"
-  },
-  "room": {
-    "create": {
-      "success": "Create room successfully",
-      "failed": "Create room failed",
-      "upload_file_failed": "Image must smaller than {{max}} MB!",
-      "message_dafault": "Group name changed to [ {{name}} ]."
-    },
-    "add_member": {
-      "success": "Add members success",
-      "fail": "Add members failed"
-    },
-    "edit": {
-      "success": "Edit room successfully",
-      "failed": "Edit room failed",
-      "desc": {
-        "success": "Edit description of room successfully",
-        "failed": "Edit description of room failed"
-      }
-    },
-    "invitation_code_required": "The link is required",
-    "invitation_code_length": "The invitation code link must be {{min}} to {{max}} characters",
-    "format_invitation_code": "Contains invalid characters, we only accept alphabets, - , and _",
-    "invitation_code_unique": "The code already exist",
-    "unknown_file": "Unknown file",
-    "name_length": "The name must be {{min}} to {{max}} characters",
-    "delete_room": {
-      "success": "Delete room successfully",
-      "failed": "Delete room failed"
-    },
-    "not_admin": "You are not  an admin. So you can't delete room.",
-    "not_me": "You can't delete yourself.",
-    "exist_member": "Existed member into this room",
-    "not_exist_member": "Hasn't existed member into this room",
-    "invitation": {
-      "get_error": "The group chat doesn't exist, or set as private.",
-      "join_request": "Your request have just send, please waiting the approved from administrator",
-      "in_room": "You are in room",
-      "join_success": "You joined this room",
-      "requested": "You requested this room",
-      "cant_join": "You can't join this room",
-      "accept": {
-        "success": "Accept request successfully",
-        "failed": "Accept request failed"
-      }
-    },
-    "delete_member": {
-      "success": "Delete member successfully",
-      "failed": "Delete member failed",
-      "myself": "Can't delete myself"
-    },
-    "not_found": "Room not found",
-    "get_infor": {
-      "failed": "Get infor room  failed."
-    },
-    "search": {
-      "text_search_required": "The key words is required",
-      "length_text_search": "Search for at least {{min}} chars"
-    },
-    "user_not_in_room": "You haven't member of room",
-    "pinned": {
-      "success": "{{pinned}} successfully",
-      "failed": "{{pinned}} failed"
-    },
-    "get_next_message": {
-      "failed": "Get message fail"
-    },
-    "change_role": {
-      "success": "Change role of members successfully",
-      "failed": "Change role of members failed"
-    },
-    "not_message_owner": "You are not message owner. So you can't delete message",
-    "message": {
-      "create": {
-        "success": "Send message successfully",
-        "failed": "Send message failed"
-      },
-      "edit": {
-        "success": "Edit message successfully",
-        "failed": "Edit message failed"
-      },
-      "validate": {
-        "content": {
-          "empty": "The content is not empty"
-        }
-      }
-    },
-    "my_chat": {
-      "failed": "Get room mychat ID failed",
-      "cant_leave": "You can't leave my chat"
-    },
-    "get_room_id": {
-      "failed": "Get room id failed"
-    }
-  },
-  "group": {
-    "name_required": "The field name is required",
-    "name_length": "Name must be {{min}} to {{max}} characters",
-    "group_not_exist": "This group is not exist !",
-    "create": {
-      "success": "Creating the group succeed !",
-      "fail": "Creating the group failed !"
-    },
-    "update": {
-      "success": "Updating the group succeed !",
-      "fail": "Updating the group failed !"
-    }
-  },
-  "socket": {
-    "room": {
-      "open_room_failed": "open_room_failed"
-    },
-    "live_chat": {
-      "create": {
-        "existed": "The call chat existed",
-        "fail": "Can't create the call chat"
-      },
-      "offer": {
-        "fail": "The call chat is not exist"
-      },
-      "accept": {
-        "fail": "Can't accept user"
-      },
-      "leave": {
-        "fail": "Error when try to leave"
-      },
-      "list_not_member": {
-        "fail": "Can't get list user for the adding member"
-      }
-    }
-  },
-  "user": {
-    "user_not_exist": "User not exist. Could not this user!",
-    "upload_file_failed": "Image must smaller than {{max}} MB!",
-    "unknown_file": "Unknown file",
-    "incorrect_phone_number_format": "Inconrrect phone number format",
-    "resend_mail_register" : {
-      "already_not_exist_user": "This email hasn't been registered.",
-      "user_has_active": "Account has been activated please Login.",
-      "failed": "Resend email failed."
-    }
-  },
-  "task": {
-    "validate": {
-      "content": {
-        "required": "The content is not empty"
-      },
-      "start_date": {
-        "not_date": "The start field is not date"
-      },
-      "end_date": {
-        "not_date": "The end field is not date",
-        "expire": " The end date less than the start date"
-      },
-      "assignees": {
-        "required": "The assignees is not empty",
-        "not_array": "The assignees is not array",
-        "not_member": "The assignees must be a member of this room"
-      },
-      "status": {
-        "not_array": "The status is not array",
-        "required": "The status is not empty",
-        "not_exist": "Status is not exist!"
-      },
-      "percent": {
-        "not_array": "The percent is not array",
-        "failed": "Percent must from {{min}} to {{max}}",
-        "status_done_failed": "Status only DONE when the percent is {{max}}"
-      }
-    },
-    "create": {
-      "error": "Create new task failed"
-    },
-    "delete": {
-      "success": "Delete task successfully",
-      "error": "Delete task failed"
-    },
-    "done": {
-      "success": "Done task",
-      "error": "Can not done task",
-      "authorization": "You can't done this task"
-    },
-    "edit": {
-      "success": "Edit task successfully",
-      "error": "Edit task failed",
-      "authorization": "You cannot edit this task",
-      "status": {
-        "success": "Edit status successfully",
-        "error": "Edit status failed"
-      }
-    },
-    "reject": {
-      "success": "Reject task successfully",
-      "error": "Reject task faild",
-      "authorization": "You can't reject this task"
-    }
-  },
-  "call-video-audio": {
-    "sent-noti-success": "Sent notification to member successful",
-    "sent-noti-failed": "Sent notification to member failed"
-  },
-  "nickname": {
-    "get_list": {
-      "failed": "Get list nickname by user failed"
-    },
-    "edit": {
-      "success": "Set nickname for users successful",
-      "failed": "Set nickname for users failed"
-    }
-  },
-  "reaction": {
-    "success": "Reaction successfully",
-    "failed": "Reaction failed"
-  }
+	"mail": {
+		"confirm": "Email sent, please check your inbox to confirm",
+		"confirmed": "Your email is confirmed!",
+		"send": "Confirmation email resent, maybe check your spam?",
+		"resend": "Email has expired! Confirmation email resent again, maybe check your spam?",
+		"resend_active_mail": "Confirmation email has been resent, if you do not see it, maybe check your spam?",
+		"send_active_mail": "Confirmation email resent, maybe check your spam?",
+		"couldNotFind": "Could not find you!",
+		"alreadyConfirmed": "Your email was already confirmed",
+		"confirm_failed": "Confirm failed",
+		"expired_token": "Expired token",
+		"resend_active_email": {
+			"failed": " Resend  email active  failed",
+			"account_have_active": "Account have  active"
+		}
+	},
+	"register_successfully": "Register Successfully",
+	"register_failed": "Register Failed",
+	"name_required": "The field name is required",
+	"username_required": "The field username is required",
+	"password_required": "The field password is required",
+	"invalid_email": "Email must be from Sun Asterisk INC",
+	"password_dont_match": "Passwords don't match",
+	"email_or_username_already": "That email address or username is already in use.",
+	"name_length": "Name must be {{min}} to {{max}} characters",
+	"username_length": "Username must be {{min}} to {{max}} characters",
+	"email_length": "Email may not be greater than {{max}} characters",
+	"password_length": "Password must be {{min}} to {{max}} characters",
+	"name_already_exist": "Name already exist",
+	"email_already_exist": "Email already exist",
+	"changed_lang": "Change language to {{lang}}",
+	"token_invalid": "Token invalid",
+	"token_valid": "Token valid",
+	"token_expired": "Token have been expired",
+	"authentication_failed": "Authentication failed",
+	"login_successfully": "Login successfully",
+	"load_to_fail_user_info": "Can't load user information !",
+	"update_to_fail_user": "Update failed !",
+	"update_to_success_user": "Update Successfully !",
+	"request_not_processed": "Request is not accepted !",
+	"change_password": {
+		"user_not_found": "User not found",
+		"old_password_incorrect": "Wrong password. Try again.",
+		"compare_new_and_confirm_password_failed": "Those passwords didn't match. Try again",
+		"compare_current_and_new_password_failed": "You have used this password recently. Please choose another password.",
+		"update_successfully": "Password changed successfully",
+		"change_password_failed": "Password changed failed",
+		"current_password_required": "The field current password is required",
+		"current_password_length": "Current password must be {{min}} to {{max}} characters",
+		"new_password_required": "The field new password is required",
+		"new_password_length": "New password must be {{min}} to {{max}} characters",
+		"confirm_password_required": "The field password is required"
+	},
+	"reset_password": {
+		"success": "Reset password Successfully",
+		"fail": "Reset password Failed",
+		"send_email": "Please check your email to reset password",
+		"not_match_pw": "The confirm password is not same password",
+		"send_email_error": "Send email unsuccessfully"
+	},
+	"login": {
+		"success": "Login Successfully",
+		"fail": "Invalid email or password.",
+		"in_active": "Please active your account"
+	},
+	"contact": {
+		"reject": {
+			"success": "Reject contact successfully",
+			"fail": "Reject contact failed"
+		},
+		"accept": {
+			"success": "Accept contact successfully",
+			"failed": "Accept contact failed"
+		},
+		"list": {
+			"failed": "Get list contacts failed"
+		},
+		"total": {
+			"failed": "Get data failed"
+		},
+		"delete_contact": {
+			"success": "Delete contact successfully",
+			"failed": "Delete contact failed"
+		},
+		"send_request": {
+			"success": "Send contact request successfully",
+			"failed": "Send contact request failed",
+			"required_input_search": "Please enter name or email address to search"
+		},
+		"list-request-sent-contact": {
+			"success": "Get list sent contact successfully",
+			"failed": "Get list sent contact failed"
+		},
+		"delete-request-sent-contact": {
+			"success": "Delete request sent contact successfully",
+			"failed": "Delete request sent contact failed"
+		}
+	},
+	"error": {
+		"403": "Forbidden error",
+		"404": "Not found",
+		"common": "Something went wrong",
+		"active_email_before_reset": "You must active email before use this feature"
+	},
+	"room": {
+		"create": {
+			"success": "Create room successfully",
+			"failed": "Create room failed",
+			"upload_file_failed": "Image must smaller than {{max}} MB!",
+			"message_dafault": "Group name changed to [ {{name}} ]."
+		},
+		"add_member": {
+			"success": "Add members success",
+			"fail": "Add members failed"
+		},
+		"edit": {
+			"success": "Edit room successfully",
+			"failed": "Edit room failed",
+			"desc": {
+				"success": "Edit description of room successfully",
+				"failed": "Edit description of room failed"
+			}
+		},
+		"invitation_code_required": "The link is required",
+		"invitation_code_length": "The invitation code link must be {{min}} to {{max}} characters",
+		"format_invitation_code": "Contains invalid characters, we only accept alphabets, - , and _",
+		"invitation_code_unique": "The code already exist",
+		"unknown_file": "Unknown file",
+		"name_length": "The name must be {{min}} to {{max}} characters",
+		"delete_room": {
+			"success": "Delete room successfully",
+			"failed": "Delete room failed"
+		},
+		"not_admin": "You are not  an admin. So you can't delete room.",
+		"not_me": "You can't delete yourself.",
+		"exist_member": "Existed member into this room",
+		"not_exist_member": "Hasn't existed member into this room",
+		"invitation": {
+			"get_error": "The group chat doesn't exist, or set as private.",
+			"join_request": "Your request have just send, please waiting the approved from administrator",
+			"in_room": "You are in room",
+			"join_success": "You joined this room",
+			"requested": "You requested this room",
+			"cant_join": "You can't join this room",
+			"accept": {
+				"success": "Accept request successfully",
+				"failed": "Accept request failed"
+			}
+		},
+		"delete_member": {
+			"success": "Delete member successfully",
+			"failed": "Delete member failed",
+			"myself": "Can't delete myself"
+		},
+		"not_found": "Room not found",
+		"get_infor": {
+			"failed": "Get infor room  failed."
+		},
+		"search": {
+			"text_search_required": "The key words is required",
+			"length_text_search": "Search for at least {{min}} chars"
+		},
+		"user_not_in_room": "You haven't member of room",
+		"pinned": {
+			"success": "{{pinned}} successfully",
+			"failed": "{{pinned}} failed"
+		},
+		"get_next_message": {
+			"failed": "Get message fail"
+		},
+		"change_role": {
+			"success": "Change role of members successfully",
+			"failed": "Change role of members failed"
+		},
+		"not_message_owner": "You are not message owner. So you can't delete message",
+		"message": {
+			"create": {
+				"success": "Send message successfully",
+				"failed": "Send message failed"
+			},
+			"edit": {
+				"success": "Edit message successfully",
+				"failed": "Edit message failed"
+			},
+			"validate": {
+				"content": {
+					"empty": "The content is not empty"
+				}
+			}
+		},
+		"my_chat": {
+			"failed": "Get room mychat ID failed",
+			"cant_leave": "You can't leave my chat"
+		},
+		"get_room_id": {
+			"failed": "Get room id failed"
+		}
+	},
+	"group": {
+		"name_required": "The field name is required",
+		"name_length": "Name must be {{min}} to {{max}} characters",
+		"group_not_exist": "This group is not exist !",
+		"create": {
+			"success": "Creating the group succeed !",
+			"fail": "Creating the group failed !"
+		},
+		"update": {
+			"success": "Updating the group succeed !",
+			"fail": "Updating the group failed !"
+		},
+		"delete": {
+			"success": "Deleting the group succeed !",
+			"fail": "Deleting the group failed !"
+		},
+		"edit": {
+			"success": "group.edit.success"
+		}
+	},
+	"socket": {
+		"room": {
+			"open_room_failed": "open_room_failed"
+		},
+		"live_chat": {
+			"create": {
+				"existed": "The call chat existed",
+				"fail": "Can't create the call chat"
+			},
+			"offer": {
+				"fail": "The call chat is not exist"
+			},
+			"accept": {
+				"fail": "Can't accept user"
+			},
+			"leave": {
+				"fail": "Error when try to leave"
+			},
+			"list_not_member": {
+				"fail": "Can't get list user for the adding member"
+			}
+		}
+	},
+	"user": {
+		"user_not_exist": "User not exist. Could not this user!",
+		"upload_file_failed": "Image must smaller than {{max}} MB!",
+		"unknown_file": "Unknown file",
+		"incorrect_phone_number_format": "Inconrrect phone number format",
+		"resend_mail_register": {
+			"already_not_exist_user": "This email hasn't been registered.",
+			"user_has_active": "Account has been activated please Login.",
+			"failed": "Resend email failed."
+		}
+	},
+	"task": {
+		"validate": {
+			"content": {
+				"required": "The content is not empty"
+			},
+			"start_date": {
+				"not_date": "The start field is not date"
+			},
+			"end_date": {
+				"not_date": "The end field is not date",
+				"expire": " The end date less than the start date"
+			},
+			"assignees": {
+				"required": "The assignees is not empty",
+				"not_array": "The assignees is not array",
+				"not_member": "The assignees must be a member of this room"
+			},
+			"status": {
+				"not_array": "The status is not array",
+				"required": "The status is not empty",
+				"not_exist": "Status is not exist!"
+			},
+			"percent": {
+				"not_array": "The percent is not array",
+				"failed": "Percent must from {{min}} to {{max}}",
+				"status_done_failed": "Status only DONE when the percent is {{max}}"
+			}
+		},
+		"create": {
+			"error": "Create new task failed"
+		},
+		"delete": {
+			"success": "Delete task successfully",
+			"error": "Delete task failed"
+		},
+		"done": {
+			"success": "Done task",
+			"error": "Can not done task",
+			"authorization": "You can't done this task"
+		},
+		"edit": {
+			"success": "Edit task successfully",
+			"error": "Edit task failed",
+			"authorization": "You cannot edit this task",
+			"status": {
+				"success": "Edit status successfully",
+				"error": "Edit status failed"
+			}
+		},
+		"reject": {
+			"success": "Reject task successfully",
+			"error": "Reject task faild",
+			"authorization": "You can't reject this task"
+		}
+	},
+	"call-video-audio": {
+		"sent-noti-success": "Sent notification to member successful",
+		"sent-noti-failed": "Sent notification to member failed"
+	},
+	"nickname": {
+		"get_list": {
+			"failed": "Get list nickname by user failed"
+		},
+		"edit": {
+			"success": "Set nickname for users successful",
+			"failed": "Set nickname for users failed"
+		}
+	},
+	"reaction": {
+		"success": "Reaction successfully",
+		"failed": "Reaction failed"
+	}
 }

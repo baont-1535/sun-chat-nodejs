@@ -15,6 +15,7 @@ import { getRoomAvatarUrl, getUserAvatarUrl } from './../../helpers/common';
 import avatarConfig from './../../config/avatar';
 import { Resizable } from 're-resizable';
 import SettingRoom from '../SettingRoom';
+import SettingGroup from '../room/group/SettingGroup';
 const { Sider } = Layout;
 
 class Sidebar extends React.Component {
@@ -343,17 +344,20 @@ class Sidebar extends React.Component {
   generateChatRoom = (index, item, tick, first_round = false) => {
     const link = item.list_room ? item.list_room[0]._id : item._id;
     const _id = tick === 'group' ? item.group_id : item._id;
+    let li_classes = tick === 'group' ? 'li-group' : (first_round ? '' : ' sub-room');
+
     return (
       <List.Item
         key={index}
         className={
           _id === this.state.selected_room
-            ? `item-active ${first_round ? '' : 'sub-room'}`
-            : `${first_round ? '' : 'sub-room'}`
+            ? `item-active ${li_classes}`
+            : `${li_classes}`
         }
         data-room-id={_id}
       >
-        <Link to={`/rooms/${link}`}>
+        <div>
+        <Link to={`/rooms/${link}`} title={item.desc}>
           <div className="avatar-name">
             <Avatar
               className={
@@ -363,13 +367,17 @@ class Sidebar extends React.Component {
               }
               size={avatarConfig.AVATAR.SIZE.MEDIUM}
               src={
-                item.type === room.ROOM_TYPE.GROUP_CHAT ? getRoomAvatarUrl(item.avatar) : getUserAvatarUrl(item.avatar)
+                item.type === room.ROOM_TYPE.GROUP_CHAT || item.list_room ? getRoomAvatarUrl(item.avatar) : getUserAvatarUrl(item.avatar)
               }
             />
             &nbsp;&nbsp;
             <span className="nav-text">{item.name}</span>
           </div>
-          <div className="state-room">
+        </Link>
+          <div className={item.list_room ? 'state-group' : 'state-room'}>
+            {item.list_room && (
+              <SettingGroup groupId={item._id}/>
+            )}
             {item.quantity_unread > 0 && !item.list_room && (
               <Typography.Text mark>{item.quantity_unread}</Typography.Text>
             )}
@@ -381,7 +389,7 @@ class Sidebar extends React.Component {
               <Icon type="pushpin" />
             </Button>
           </div>
-        </Link>
+        </div>
       </List.Item>
     );
   };

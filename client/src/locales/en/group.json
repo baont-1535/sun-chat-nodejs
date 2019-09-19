@@ -7,13 +7,19 @@
   "title": {
     "create_group": "Gross into new group",
     "edit_group": "Edit group",
+    "delete_group": "Delete group",
     "upload": "Upload",
     "group_name": "Group Chat Name",
     "group_des": "Description",
-    "add_group": "Add group"
+    "add_room_into_group": "Add room into group"
   },
   "button": {
     "cancel": "Cancel",
     "submit": "Submit"
+  },
+  "notice": {
+    "confirm": {
+      "delete": "Do you really want delete this group ?"
+    }
   }
 }

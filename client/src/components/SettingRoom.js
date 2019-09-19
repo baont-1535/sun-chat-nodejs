@@ -1,10 +1,11 @@
 import React, { PureComponent } from 'react';
 import 'antd/dist/antd.css';
 import FormCreateRoom from './modals/room/FormCreateRoom';
-import FormCreateGroup from './modals/room/FormCreateGroup';
+import FormGroup from './modals/group/FormGroup';
 import { withNamespaces } from 'react-i18next';
 import { withRouter } from 'react-router';
 import { Icon, Badge, Popover } from 'antd';
+import { getInfoForGroupForm } from '../api/group';
 
 class SettingRoom extends PureComponent {
   constructor(props) {
@@ -13,8 +14,18 @@ class SettingRoom extends PureComponent {
     this.state = {
       modalCreateRoom: false,
       modalCreateGroup: false,
+      listChat: [],
     };
   }
+
+  openCreateGroupForm = () => {
+    getInfoForGroupForm().then(res => {
+      this.setState({
+        listChat: res.data.rooms,
+      });
+    });
+    this.handleModalCreateGroup(true);
+  };
 
   handleModalVisible = flag => {
     this.setState({
@@ -30,13 +41,13 @@ class SettingRoom extends PureComponent {
 
   render() {
     const { t } = this.props;
-    const { modalCreateRoom, modalCreateGroup } = this.state;
+    const { modalCreateRoom, modalCreateGroup, listChat } = this.state;
     const methodCreateRoom = {
       handleModalVisible: this.handleModalVisible,
     };
 
     const methodCreateGroup = {
-      handleModalCreateGroup: this.handleModalCreateGroup,
+      handleModalGroup: this.handleModalCreateGroup,
     };
 
     const content = (
@@ -47,7 +58,7 @@ class SettingRoom extends PureComponent {
           </a>
         </p>
         <p>
-          <a href="javascript:;" onClick={() => this.handleModalCreateGroup(true)}>
+          <a href="javascript:;" onClick={() => this.openCreateGroupForm()}>
             <Icon type="menu-unfold" /> {t('group:title.create_group')}
           </a>
         </p>
@@ -64,7 +75,7 @@ class SettingRoom extends PureComponent {
           </Badge>
         </Popover>
         <FormCreateRoom {...methodCreateRoom} modalVisible={modalCreateRoom} />
-        <FormCreateGroup {...methodCreateGroup} modalVisible={modalCreateGroup} />
+        <FormGroup {...methodCreateGroup} modalVisible={modalCreateGroup} rooms={listChat} />
       </React.Fragment>
     );
   }
